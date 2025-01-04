@@ -86,7 +86,7 @@ class Routes extends BaseCommand
         $host          = $params['host'] ?? null;
 
         // Set HTTP_HOST
-        if ($host !== null) {
+        if ($host) {
             $request              = service('request');
             $_SERVER              = $request->getServer();
             $_SERVER['HTTP_HOST'] = $host;
@@ -96,7 +96,7 @@ class Routes extends BaseCommand
         $collection = service('routes')->loadRoutes();
 
         // Reset HTTP_HOST
-        if ($host !== null) {
+        if ($host) {
             unset($_SERVER['HTTP_HOST']);
         }
 
@@ -139,9 +139,7 @@ class Routes extends BaseCommand
                 $autoRoutes = $autoRouteCollector->get();
 
                 // Check for Module Routes.
-                $routingConfig = config(Routing::class);
-
-                if ($routingConfig instanceof Routing) {
+                if ($routingConfig = config(Routing::class)) {
                     foreach ($routingConfig->moduleRoutes as $uri => $namespace) {
                         $autoRouteCollector = new AutoRouteCollectorImproved(
                             $namespace,
@@ -187,10 +185,10 @@ class Routes extends BaseCommand
 
         // Sort by Handler.
         if ($sortByHandler) {
-            usort($tbody, static fn ($handler1, $handler2): int => strcmp($handler1[3], $handler2[3]));
+            usort($tbody, static fn ($handler1, $handler2) => strcmp($handler1[3], $handler2[3]));
         }
 
-        if ($host !== null) {
+        if ($host) {
             CLI::write('Host: ' . $host);
         }
 

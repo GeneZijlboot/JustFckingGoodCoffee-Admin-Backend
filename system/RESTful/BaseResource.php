@@ -61,7 +61,7 @@ abstract class BaseResource extends Controller
      */
     public function setModel($which = null)
     {
-        if ($which !== null) {
+        if ($which) {
             $this->model     = is_object($which) ? $which : null;
             $this->modelName = is_object($which) ? null : $which;
         }

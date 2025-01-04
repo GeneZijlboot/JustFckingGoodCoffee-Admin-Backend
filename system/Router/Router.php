@@ -181,7 +181,7 @@ class Router implements RouterInterface
     }
 
     /**
-     * Finds the controller corresponding to the URI.
+     * Finds the controller method corresponding to the URI.
      *
      * @param string|null $uri URI path relative to baseURL
      *
@@ -241,20 +241,20 @@ class Router implements RouterInterface
     }
 
     /**
-     * Returns the name of the matched controller or closure.
+     * Returns the name of the matched controller.
      *
      * @return (Closure(mixed...): (ResponseInterface|string|void))|string Controller classname or Closure
      */
     public function controllerName()
     {
-        return $this->translateURIDashes && ! $this->controller instanceof Closure
+        return $this->translateURIDashes
             ? str_replace('-', '_', $this->controller)
             : $this->controller;
     }
 
     /**
      * Returns the name of the method to run in the
-     * chosen controller.
+     * chosen container.
      */
     public function methodName(): string
     {
@@ -433,7 +433,7 @@ class Router implements RouterInterface
                 // Is this route supposed to redirect to another?
                 if ($this->collection->isRedirect($routeKey)) {
                     // replacing matched route groups with references: post/([0-9]+) -> post/$1
-                    $redirectTo = preg_replace_callback('/(\([^\(]+\))/', static function (): string {
+                    $redirectTo = preg_replace_callback('/(\([^\(]+\))/', static function () {
                         static $i = 1;
 
                         return '$' . $i++;
@@ -590,7 +590,7 @@ class Router implements RouterInterface
      */
     protected function scanControllers(array $segments): array
     {
-        $segments = array_filter($segments, static fn ($segment): bool => $segment !== '');
+        $segments = array_filter($segments, static fn ($segment) => $segment !== '');
         // numerically reindex the array, removing gaps
         $segments = array_values($segments);
 

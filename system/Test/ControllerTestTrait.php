@@ -31,7 +31,7 @@ use Throwable;
  *
  *  $this->withRequest($request)
  *       ->withResponse($response)
- *       ->withUri($uri)
+ *       ->withURI($uri)
  *       ->withBody($body)
  *       ->controller('App\Controllers\Home')
  *       ->execute('methodName');
@@ -109,14 +109,14 @@ trait ControllerTestTrait
             $tempUri = service('uri');
             Services::injectMock('uri', $this->uri);
 
-            $this->withRequest(service('incomingrequest', $this->appConfig, false));
+            $this->withRequest(Services::incomingrequest($this->appConfig, false));
 
             // Restore the URI service
             Services::injectMock('uri', $tempUri);
         }
 
         if (empty($this->response)) {
-            $this->response = service('response', $this->appConfig, false);
+            $this->response = Services::response($this->appConfig, false);
         }
 
         if (empty($this->logger)) {
@@ -285,7 +285,7 @@ trait ControllerTestTrait
         Services::injectMock('uri', $this->uri);
 
         // Update the Request instance, because Request has the SiteURI instance.
-        $this->request = service('incomingrequest', null, false);
+        $this->request = Services::incomingrequest(null, false);
         Services::injectMock('request', $this->request);
 
         return $this;

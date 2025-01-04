@@ -19,6 +19,7 @@ use CodeIgniter\Exceptions\ConfigException;
 use CodeIgniter\I18n\Time;
 use Config\Database;
 use Config\Migrations as MigrationsConfig;
+use Config\Services;
 use RuntimeException;
 use stdClass;
 
@@ -389,7 +390,7 @@ class MigrationRunner
      */
     public function findMigrations(): array
     {
-        $namespaces = $this->namespace !== null ? [$this->namespace] : array_keys(service('autoloader')->getNamespace());
+        $namespaces = $this->namespace ? [$this->namespace] : array_keys(Services::autoloader()->getNamespace());
         $migrations = [];
 
         foreach ($namespaces as $namespace) {
@@ -414,7 +415,7 @@ class MigrationRunner
     public function findNamespaceMigrations(string $namespace): array
     {
         $migrations = [];
-        $locator    = service('locator', true);
+        $locator    = Services::locator(true);
 
         if (! empty($this->path)) {
             helper('filesystem');
@@ -450,11 +451,11 @@ class MigrationRunner
 
         $filename = basename($path, '.php');
 
-        if (preg_match($this->regex, $filename) !== 1) {
+        if (! preg_match($this->regex, $filename)) {
             return false;
         }
 
-        $locator = service('locator', true);
+        $locator = Services::locator(true);
 
         $migration = new stdClass();
 
@@ -524,7 +525,7 @@ class MigrationRunner
     {
         preg_match($this->regex, $migration, $matches);
 
-        return $matches !== [] ? $matches[1] : '0';
+        return count($matches) ? $matches[1] : '0';
     }
 
     /**
@@ -539,7 +540,7 @@ class MigrationRunner
     {
         preg_match($this->regex, $migration, $matches);
 
-        return $matches !== [] ? $matches[2] : '';
+        return count($matches) ? $matches[2] : '';
     }
 
     /**
@@ -645,7 +646,7 @@ class MigrationRunner
         }
 
         // If a namespace was specified then use it
-        if ($this->namespace !== null) {
+        if ($this->namespace) {
             $builder->where('namespace', $this->namespace);
         }
 
@@ -700,7 +701,7 @@ class MigrationRunner
             ->get()
             ->getResultObject();
 
-        $batch = is_array($batch) && $batch !== []
+        $batch = is_array($batch) && count($batch)
             ? end($batch)->batch
             : 0;
 
@@ -725,7 +726,7 @@ class MigrationRunner
             ->get()
             ->getResultObject();
 
-        return $migration !== [] ? $migration[0]->version : '0';
+        return count($migration) ? $migration[0]->version : '0';
     }
 
     /**

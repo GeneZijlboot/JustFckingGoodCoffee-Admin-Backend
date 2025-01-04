@@ -76,7 +76,6 @@ class FileHandler extends BaseHandler
 
         $msg = '';
 
-        $newfile = false;
         if (! is_file($filepath)) {
             $newfile = true;
 
@@ -118,7 +117,7 @@ class FileHandler extends BaseHandler
         flock($fp, LOCK_UN);
         fclose($fp);
 
-        if ($newfile) {
+        if (isset($newfile) && $newfile === true) {
             chmod($filepath, $this->filePermissions);
         }
 

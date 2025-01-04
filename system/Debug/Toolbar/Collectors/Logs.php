@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Debug\Toolbar\Collectors;
 
+use Config\Services;
+
 /**
  * Loags collector
  */
@@ -90,6 +92,6 @@ class Logs extends BaseCollector
             return $this->data;
         }
 
-        return $this->data = service('logger', true)->logCache ?? [];
+        return $this->data = Services::logger(true)->logCache ?? [];
     }
 }

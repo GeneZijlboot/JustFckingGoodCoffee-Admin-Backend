@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace CodeIgniter\Log\Handlers;
 
 use CodeIgniter\HTTP\ResponseInterface;
+use Config\Services;
 
 /**
  * Class ChromeLoggerHandler
@@ -155,8 +156,8 @@ class ChromeLoggerHandler extends BaseHandler
      */
     public function sendLogs(?ResponseInterface &$response = null)
     {
-        if (! $response instanceof ResponseInterface) {
-            $response = service('response', null, true);
+        if ($response === null) {
+            $response = Services::response(null, true);
         }
 
         $data = base64_encode(

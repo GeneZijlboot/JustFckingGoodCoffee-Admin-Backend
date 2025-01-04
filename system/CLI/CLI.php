@@ -14,6 +14,7 @@ declare(strict_types=1);
 namespace CodeIgniter\CLI;
 
 use CodeIgniter\CLI\Exceptions\CLIException;
+use Config\Services;
 use InvalidArgumentException;
 use Throwable;
 
@@ -225,12 +226,12 @@ class CLI
         $extraOutput = '';
         $default     = '';
 
-        if (isset($validation) && ! is_array($validation) && ! is_string($validation)) {
+        if ($validation && ! is_array($validation) && ! is_string($validation)) {
             throw new InvalidArgumentException('$rules can only be of type string|array');
         }
 
         if (! is_array($validation)) {
-            $validation = ($validation !== null) ? explode('|', $validation) : [];
+            $validation = $validation ? explode('|', $validation) : [];
         }
 
         if (is_string($options)) {
@@ -339,7 +340,7 @@ class CLI
             $pattern = preg_match_all('/^\d+(,\d+)*$/', trim($input));
 
             // separate input by comma and convert all to an int[]
-            $inputToArray = array_map(static fn ($value): int => (int) $value, explode(',', $input));
+            $inputToArray = array_map(static fn ($value) => (int) $value, explode(',', $input));
             // find max from key of $options
             $maxOptions = array_key_last($options);
             // find max from input
@@ -348,7 +349,7 @@ class CLI
             // return the prompt again if $input contain(s) non-numeric character, except a comma.
             // And if max from $options less than max from input,
             // it means user tried to access null value in $options
-            if ($pattern === 0 || $maxOptions < $maxInput) {
+            if (! $pattern || $maxOptions < $maxInput) {
                 static::error('Please select correctly.');
                 CLI::newLine();
 
@@ -415,7 +416,7 @@ class CLI
     {
         $label      = $field;
         $field      = 'temp';
-        $validation = service('validation', null, false);
+        $validation = Services::validation(null, false);
         $validation->setRules([
             $field => [
                 'label' => $label,
@@ -441,7 +442,7 @@ class CLI
      */
     public static function print(string $text = '', ?string $foreground = null, ?string $background = null)
     {
-        if ((string) $foreground !== '' || (string) $background !== '') {
+        if ($foreground || $background) {
             $text = static::color($text, $foreground, $background);
         }
 
@@ -457,7 +458,7 @@ class CLI
      */
     public static function write(string $text = '', ?string $foreground = null, ?string $background = null)
     {
-        if ((string) $foreground !== '' || (string) $background !== '') {
+        if ($foreground || $background) {
             $text = static::color($text, $foreground, $background);
         }
 
@@ -480,7 +481,7 @@ class CLI
         $stdout            = static::$isColored;
         static::$isColored = static::hasColorSupport(STDERR);
 
-        if ($foreground !== '' || (string) $background !== '') {
+        if ($foreground || $background) {
             $text = static::color($text, $foreground, $background);
         }
 
@@ -513,7 +514,7 @@ class CLI
      */
     public static function wait(int $seconds, bool $countdown = false)
     {
-        if ($countdown) {
+        if ($countdown === true) {
             $time = $seconds;
 
             while ($time > 0) {
@@ -589,7 +590,7 @@ class CLI
             throw CLIException::forInvalidColor('foreground', $foreground);
         }
 
-        if ((string) $background !== '' && ! array_key_exists($background, static::$background_colors)) {
+        if ($background !== null && ! array_key_exists($background, static::$background_colors)) {
             throw CLIException::forInvalidColor('background', $background);
         }
 
@@ -637,7 +638,7 @@ class CLI
     {
         $string = "\033[" . static::$foreground_colors[$foreground] . 'm';
 
-        if ((string) $background !== '') {
+        if ($background !== null) {
             $string .= "\033[" . static::$background_colors[$background] . 'm';
         }
 
@@ -654,7 +655,7 @@ class CLI
      */
     public static function strlen(?string $string): int
     {
-        if ((string) $string === '') {
+        if ($string === null) {
             return 0;
         }
 
@@ -768,7 +769,7 @@ class CLI
 
                     // Look for the next lines ending in ": <number>"
                     // Searching for "Columns:" or "Lines:" will fail on non-English locales
-                    if ($return === 0 && $output !== [] && preg_match('/:\s*(\d+)\n[^:]+:\s*(\d+)\n/', implode("\n", $output), $matches)) {
+                    if ($return === 0 && $output && preg_match('/:\s*(\d+)\n[^:]+:\s*(\d+)\n/', implode("\n", $output), $matches)) {
                         static::$height = (int) $matches[1];
                         static::$width  = (int) $matches[2];
                     }
@@ -835,7 +836,7 @@ class CLI
      */
     public static function wrap(?string $string = null, int $max = 0, int $padLeft = 0): string
     {
-        if ((string) $string === '') {
+        if ($string === null || $string === '') {
             return '';
         }
 

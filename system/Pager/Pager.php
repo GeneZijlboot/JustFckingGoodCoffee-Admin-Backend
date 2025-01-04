@@ -288,7 +288,7 @@ class Pager implements PagerInterface
             $uri->setQueryArray($query);
         }
 
-        return $returnObject
+        return ($returnObject === true)
             ? $uri
             : URI::createURIString(
                 $uri->getScheme(),

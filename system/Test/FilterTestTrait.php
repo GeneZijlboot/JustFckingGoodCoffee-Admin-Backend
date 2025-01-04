@@ -119,8 +119,6 @@ trait FilterTestTrait
      *
      * @param FilterInterface|string $filter   The filter instance, class, or alias
      * @param string                 $position "before" or "after"
-     *
-     * @phpstan-return Closure(list<string>|null=): mixed
      */
     protected function getFilterCaller($filter, string $position): Closure
     {
@@ -221,9 +219,7 @@ trait FilterTestTrait
 
         $this->filters->reset();
 
-        $routeFilters = $this->collection->getFiltersForRoute($route);
-
-        if ($routeFilters !== []) {
+        if ($routeFilters = $this->collection->getFiltersForRoute($route)) {
             $this->filters->enableFilters($routeFilters, $position);
         }
 

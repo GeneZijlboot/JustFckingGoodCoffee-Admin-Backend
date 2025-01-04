@@ -317,13 +317,13 @@ class Model extends BaseModel
 
         if ($this->tempUseSoftDeletes) {
             $builder->where($this->table . '.' . $this->deletedField, null);
-        } elseif ($this->useSoftDeletes && ($builder->QBGroupBy === []) && $this->primaryKey !== '') {
+        } elseif ($this->useSoftDeletes && ($builder->QBGroupBy === []) && $this->primaryKey) {
             $builder->groupBy($this->table . '.' . $this->primaryKey);
         }
 
         // Some databases, like PostgreSQL, need order
         // information to consistently return correct results.
-        if ($builder->QBGroupBy !== [] && ($builder->QBOrderBy === []) && $this->primaryKey !== '') {
+        if ($builder->QBGroupBy && ($builder->QBOrderBy === []) && $this->primaryKey) {
             $builder->orderBy($this->table . '.' . $this->primaryKey, 'asc');
         }
 
@@ -443,7 +443,7 @@ class Model extends BaseModel
 
         $builder = $this->builder();
 
-        if (! in_array($id, [null, '', 0, '0', []], true)) {
+        if ($id) {
             $builder = $builder->whereIn($this->table . '.' . $this->primaryKey, $id);
         }
 
@@ -496,7 +496,7 @@ class Model extends BaseModel
         $set     = [];
         $builder = $this->builder();
 
-        if (! in_array($id, [null, '', 0, '0', []], true)) {
+        if ($id) {
             $builder = $builder->whereIn($this->primaryKey, $id);
         }
 
@@ -592,9 +592,9 @@ class Model extends BaseModel
      */
     public function getIdValue($row)
     {
-        if (is_object($row)) {
-            // Get the raw or mapped primary key value of the Entity.
-            if ($row instanceof Entity && $row->{$this->primaryKey} !== null) {
+        if (is_object($row) && isset($row->{$this->primaryKey})) {
+            // Get the raw primary key value of the Entity.
+            if ($row instanceof Entity) {
                 $cast = $row->cast();
 
                 // Disable Entity casting, because raw primary key value is needed for database.
@@ -608,9 +608,7 @@ class Model extends BaseModel
                 return $primaryKey;
             }
 
-            if (! $row instanceof Entity && isset($row->{$this->primaryKey})) {
-                return $row->{$this->primaryKey};
-            }
+            return $row->{$this->primaryKey};
         }
 
         if (is_array($row) && isset($row[$this->primaryKey])) {
@@ -625,6 +623,10 @@ class Model extends BaseModel
      * Works with $this->builder to get the Compiled select to
      * determine the rows to operate on.
      * This method works only with dbCalls.
+     *
+     * @return void
+     *
+     * @throws DataException
      */
     public function chunk(int $size, Closure $userFunc)
     {
@@ -690,7 +692,7 @@ class Model extends BaseModel
         // Check for an existing Builder
         if ($this->builder instanceof BaseBuilder) {
             // Make sure the requested table matches the builder
-            if ((string) $table !== '' && $this->builder->getTable() !== $table) {
+            if ($table && $this->builder->getTable() !== $table) {
                 return $this->db->table($table);
             }
 
@@ -704,7 +706,7 @@ class Model extends BaseModel
             throw ModelException::forNoPrimaryKey(static::class);
         }
 
-        $table = ((string) $table === '') ? $this->table : $table;
+        $table = ($table === null || $table === '') ? $this->table : $table;
 
         // Ensure we have a good db connection
         if (! $this->db instanceof BaseConnection) {

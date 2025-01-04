@@ -485,7 +485,7 @@ class Email
         if ($this->validate) {
             $this->validateEmail($this->stringToArray($from));
 
-            if ($returnPath !== null) {
+            if ($returnPath) {
                 $this->validateEmail($this->stringToArray($returnPath));
             }
         }
@@ -495,7 +495,7 @@ class Email
 
         if ($name !== '') {
             // only use Q encoding if there are characters that would require it
-            if (preg_match('/[\200-\377]/', $name) !== 1) {
+            if (! preg_match('/[\200-\377]/', $name)) {
                 $name = '"' . addcslashes($name, "\0..\37\177'\"\\") . '"';
             } else {
                 $name = $this->prepQEncoding($name);
@@ -532,7 +532,7 @@ class Email
             $this->tmpArchive['replyName'] = $name;
 
             // only use Q encoding if there are characters that would require it
-            if (preg_match('/[\200-\377]/', $name) !== 1) {
+            if (! preg_match('/[\200-\377]/', $name)) {
                 $name = '"' . addcslashes($name, "\0..\37\177'\"\\") . '"';
             } else {
                 $name = $this->prepQEncoding($name);
@@ -1233,9 +1233,7 @@ class Email
                     $this->headerStr .= $hdr;
                 }
 
-                if (static::strlen($body) > 0) {
-                    $body .= $this->newline . $this->newline;
-                }
+                static::strlen($body) && $body .= $this->newline . $this->newline;
 
                 $body .= $this->getMimeMessage() . $this->newline . $this->newline
                     . '--' . $lastBoundary . $this->newline

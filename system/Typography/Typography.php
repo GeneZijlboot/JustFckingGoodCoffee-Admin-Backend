@@ -171,7 +171,7 @@ class Typography
         }
 
         // No opening block level tag? Add it if needed.
-        if (preg_match('/^\s*<(?:' . $this->blockElements . ')/i', $str) !== 1) {
+        if (! preg_match('/^\s*<(?:' . $this->blockElements . ')/i', $str)) {
             $str = preg_replace('/^(.*?)<(' . $this->blockElements . ')/i', '<p>$1</p><$2', $str);
         }
 
@@ -214,7 +214,7 @@ class Typography
         ];
 
         // Do we need to reduce empty lines?
-        if ($reduceLinebreaks) {
+        if ($reduceLinebreaks === true) {
             $table['#<p>\n*</p>#'] = '';
         } else {
             // If we have empty paragraph tags we add a non-breaking space

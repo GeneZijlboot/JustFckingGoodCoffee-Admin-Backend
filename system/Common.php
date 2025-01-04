@@ -28,7 +28,6 @@ use CodeIgniter\HTTP\IncomingRequest;
 use CodeIgniter\HTTP\RedirectResponse;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
-use CodeIgniter\Language\Language;
 use CodeIgniter\Model;
 use CodeIgniter\Session\Session;
 use CodeIgniter\Test\TestLogger;
@@ -441,7 +440,7 @@ if (! function_exists('esc')) {
                 $escaper = new Escaper($encoding);
             }
 
-            if ($encoding !== null && $escaper->getEncoding() !== $encoding) {
+            if ($encoding && $escaper->getEncoding() !== $encoding) {
                 $escaper = new Escaper($encoding);
             }
 
@@ -580,8 +579,8 @@ if (! function_exists('helper')) {
         foreach ($filenames as $filename) {
             // Store our system and application helper
             // versions so that we can control the load ordering.
-            $systemHelper  = '';
-            $appHelper     = '';
+            $systemHelper  = null;
+            $appHelper     = null;
             $localIncludes = [];
 
             if (! str_contains($filename, '_helper')) {
@@ -598,7 +597,7 @@ if (! function_exists('helper')) {
             if (str_contains($filename, '\\')) {
                 $path = $loader->locateFile($filename, 'Helpers');
 
-                if ($path === false) {
+                if (empty($path)) {
                     throw FileNotFoundException::forFileNotFound($filename);
                 }
 
@@ -620,7 +619,7 @@ if (! function_exists('helper')) {
                 }
 
                 // App-level helpers should override all others
-                if ($appHelper !== '') {
+                if (! empty($appHelper)) {
                     $includes[] = $appHelper;
                     $loaded[]   = $filename;
                 }
@@ -629,7 +628,7 @@ if (! function_exists('helper')) {
                 $includes = [...$includes, ...$localIncludes];
 
                 // And the system default one should be added in last.
-                if ($systemHelper !== '') {
+                if (! empty($systemHelper)) {
                     $includes[] = $systemHelper;
                     $loaded[]   = $filename;
                 }
@@ -733,19 +732,18 @@ if (! function_exists('lang')) {
      */
     function lang(string $line, array $args = [], ?string $locale = null)
     {
-        /** @var Language $language */
         $language = service('language');
 
         // Get active locale
         $activeLocale = $language->getLocale();
 
-        if ((string) $locale !== '' && $locale !== $activeLocale) {
+        if ($locale && $locale !== $activeLocale) {
             $language->setLocale($locale);
         }
 
         $lines = $language->getLine($line, $args);
 
-        if ((string) $locale !== '' && $locale !== $activeLocale) {
+        if ($locale && $locale !== $activeLocale) {
             // Reset to active locale
             $language->setLocale($activeLocale);
         }
@@ -849,7 +847,7 @@ if (! function_exists('redirect')) {
     {
         $response = service('redirectresponse');
 
-        if ((string) $route !== '') {
+        if ($route !== null) {
             return $response->route($route);
         }
 
@@ -869,7 +867,7 @@ if (! function_exists('_solidus')) {
     {
         static $docTypes = null;
 
-        if ($docTypesConfig instanceof DocTypes) {
+        if ($docTypesConfig !== null) {
             $docTypes = $docTypesConfig;
         }
 
@@ -1092,7 +1090,7 @@ if (! function_exists('stringify_attributes')) {
     {
         $atts = '';
 
-        if ($attributes === '' || $attributes === [] || $attributes === null) {
+        if (empty($attributes)) {
             return $atts;
         }
 

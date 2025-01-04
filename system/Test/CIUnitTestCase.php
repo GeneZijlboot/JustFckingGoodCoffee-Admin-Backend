@@ -238,7 +238,7 @@ abstract class CIUnitTestCase extends TestCase
     {
         parent::setUp();
 
-        if (! $this->app instanceof CodeIgniter) {
+        if (! $this->app) {
             $this->app = $this->createApplication();
         }
 
@@ -374,7 +374,7 @@ abstract class CIUnitTestCase extends TestCase
     {
         $this->assertTrue(
             TestLogger::didLog($level, $logMessage, false),
-            $message !== '' ? $message : sprintf(
+            $message ?: sprintf(
                 'Failed asserting that logs have a record of message containing "%s" with level "%s".',
                 $logMessage,
                 $level

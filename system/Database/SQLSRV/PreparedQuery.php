@@ -59,7 +59,7 @@ class PreparedQuery extends BasePreparedQuery
         // Prepare parameters for the query
         $queryString = $this->getQueryString();
 
-        $parameters = $this->parameterize($queryString, $options);
+        $parameters = $this->parameterize($queryString);
 
         // Prepare the query
         $this->statement = sqlsrv_prepare($this->db->connID, $sql, $parameters);
@@ -120,10 +120,8 @@ class PreparedQuery extends BasePreparedQuery
 
     /**
      * Handle parameters.
-     *
-     * @param array<int, mixed> $options
      */
-    protected function parameterize(string $queryString, array $options): array
+    protected function parameterize(string $queryString): array
     {
         $numberOfVariables = substr_count($queryString, '?');
 
@@ -131,11 +129,7 @@ class PreparedQuery extends BasePreparedQuery
 
         for ($c = 0; $c < $numberOfVariables; $c++) {
             $this->parameters[$c] = null;
-            if (isset($options[$c])) {
-                $params[] = [&$this->parameters[$c], SQLSRV_PARAM_IN, $options[$c]];
-            } else {
-                $params[] = &$this->parameters[$c];
-            }
+            $params[]             = &$this->parameters[$c];
         }
 
         return $params;

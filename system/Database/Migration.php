@@ -45,7 +45,7 @@ abstract class Migration
     {
         if (isset($this->DBGroup)) {
             $this->forge = Database::forge($this->DBGroup);
-        } elseif ($forge instanceof Forge) {
+        } elseif ($forge !== null) {
             $this->forge = $forge;
         } else {
             $this->forge = Database::forge(config(Database::class)->defaultGroup);

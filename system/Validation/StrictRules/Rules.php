@@ -48,15 +48,11 @@ class Rules
             return $str !== dot_array_search($otherField, $data);
         }
 
-        if (! array_key_exists($otherField, $data)) {
+        if (! array_key_exists($field, $data)) {
             return false;
         }
 
-        if (str_contains($field, '.')) {
-            if (! ArrayHelper::dotKeyExists($field, $data)) {
-                return false;
-            }
-        } elseif (! array_key_exists($field, $data)) {
+        if (! array_key_exists($otherField, $data)) {
             return false;
         }
 
@@ -164,7 +160,7 @@ class Rules
         if (
             $whereField !== null && $whereField !== ''
             && $whereValue !== null && $whereValue !== ''
-            && preg_match('/^\{(\w+)\}$/', $whereValue) !== 1
+            && ! preg_match('/^\{(\w+)\}$/', $whereValue)
         ) {
             $row = $row->where($whereField, $whereValue);
         }
@@ -224,7 +220,7 @@ class Rules
         if (
             $ignoreField !== null && $ignoreField !== ''
             && $ignoreValue !== null && $ignoreValue !== ''
-            && preg_match('/^\{(\w+)\}$/', $ignoreValue) !== 1
+            && ! preg_match('/^\{(\w+)\}$/', $ignoreValue)
         ) {
             $row = $row->where("{$ignoreField} !=", $ignoreValue);
         }
@@ -285,15 +281,11 @@ class Rules
             return $str === dot_array_search($otherField, $data);
         }
 
-        if (! array_key_exists($otherField, $data)) {
+        if (! array_key_exists($field, $data)) {
             return false;
         }
 
-        if (str_contains($field, '.')) {
-            if (! ArrayHelper::dotKeyExists($field, $data)) {
-                return false;
-            }
-        } elseif (! array_key_exists($field, $data)) {
+        if (! array_key_exists($otherField, $data)) {
             return false;
         }
 

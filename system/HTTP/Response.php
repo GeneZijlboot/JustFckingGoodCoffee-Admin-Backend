@@ -18,6 +18,7 @@ use CodeIgniter\Cookie\CookieStore;
 use CodeIgniter\HTTP\Exceptions\HTTPException;
 use Config\App;
 use Config\Cookie as CookieConfig;
+use Config\Services;
 
 /**
  * Representation of an outgoing, server-side response.
@@ -157,7 +158,7 @@ class Response extends Message implements ResponseInterface
         $this->noCache();
 
         // We need CSP object even if not enabled to avoid calls to non existing methods
-        $this->CSP = service('csp');
+        $this->CSP = Services::csp();
 
         $this->cookieStore = new CookieStore([]);
 

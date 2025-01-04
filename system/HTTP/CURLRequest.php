@@ -389,7 +389,7 @@ class CURLRequest extends OutgoingRequest
             $output = substr($output, strpos($output, $breakString) + 4);
         }
 
-        if (preg_match('/HTTP\/\d\.\d 200 Connection established/i', $output)) {
+        if (str_starts_with($output, 'HTTP/1.1 200 Connection established')) {
             $output = substr($output, strpos($output, $breakString) + 4);
         }
 

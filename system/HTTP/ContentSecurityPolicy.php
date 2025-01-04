@@ -31,7 +31,7 @@ class ContentSecurityPolicy
     /**
      * CSP directives
      *
-     * @var array<string, string> [name => property]
+     * @var array<string, string>
      */
     protected array $directives = [
         'base-uri'        => 'baseURI',
@@ -166,8 +166,7 @@ class ContentSecurityPolicy
     protected $sandbox = [];
 
     /**
-     * A set of endpoints to which csp violation reports will be sent when
-     * particular behaviors are prevented.
+     * Used for security enforcement
      *
      * @var string|null
      */
@@ -190,7 +189,7 @@ class ContentSecurityPolicy
     /**
      * Used for security enforcement
      *
-     * @var list<string>
+     * @var array
      */
     protected $validSources = [
         'self',
@@ -243,7 +242,7 @@ class ContentSecurityPolicy
 
     /**
      * An array of header info since we have
-     * to build ourselves before passing to Response.
+     * to build ourself before passing to Response.
      *
      * @var array
      */
@@ -356,9 +355,9 @@ class ContentSecurityPolicy
     }
 
     /**
-     * Adds a new baseURI value. Can be either a URI class or a simple string.
+     * Adds a new base_uri value. Can be either a URI class or a simple string.
      *
-     * baseURI restricts the URLs that can appear in a page's <base> element.
+     * base_uri restricts the URLs that can appear in a page's <base> element.
      *
      * @see http://www.w3.org/TR/CSP/#directive-base-uri
      *
@@ -595,9 +594,6 @@ class ContentSecurityPolicy
      *
      * @see http://www.w3.org/TR/CSP/#directive-report-uri
      *
-     * @param string $uri URL to send reports. Set `''` if you want to remove
-     *                    this directive at runtime.
-     *
      * @return $this
      */
     public function setReportURI(string $uri)
@@ -713,7 +709,7 @@ class ContentSecurityPolicy
         $pattern = '/(' . preg_quote($this->styleNonceTag, '/')
             . '|' . preg_quote($this->scriptNonceTag, '/') . ')/';
 
-        $body = preg_replace_callback($pattern, function ($match): string {
+        $body = preg_replace_callback($pattern, function ($match) {
             $nonce = $match[0] === $this->styleNonceTag ? $this->getStyleNonce() : $this->getScriptNonce();
 
             return "nonce=\"{$nonce}\"";

@@ -1,5 +1,6 @@
 <?php
 use CodeIgniter\HTTP\Header;
+use Config\Services;
 use CodeIgniter\CodeIgniter;
 
 $errorId = uniqid('error', true);
@@ -224,7 +225,7 @@ $errorId = uniqid('error', true);
 
             <!-- Request -->
             <div class="content" id="request">
-                <?php $request = service('request'); ?>
+                <?php $request = Services::request(); ?>
 
                 <table>
                     <tbody>
@@ -342,7 +343,7 @@ $errorId = uniqid('error', true);
 
             <!-- Response -->
             <?php
-                $response = service('response');
+                $response = Services::response();
                 $response->setStatusCode(http_response_code());
             ?>
             <div class="content" id="response">

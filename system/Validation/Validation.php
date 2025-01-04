@@ -21,6 +21,7 @@ use CodeIgniter\HTTP\Method;
 use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\Validation\Exceptions\ValidationException;
 use CodeIgniter\View\RendererInterface;
+use Config\Services;
 use Config\Validation as ValidationConfig;
 use InvalidArgumentException;
 use LogicException;
@@ -50,7 +51,7 @@ class Validation implements ValidationInterface
     /**
      * Stores the actual rules that should be run against $data.
      *
-     * @var array<array-key, array{label?: string, rules: list<string>}>
+     * @var array
      *
      * [
      *     field1 => [
@@ -162,9 +163,6 @@ class Validation implements ValidationInterface
         // Run through each rule. If we have any field set for
         // this rule, then we need to run them through!
         foreach ($this->rules as $field => $setup) {
-            //  An array key might be int.
-            $field = (string) $field;
-
             $rules = $setup['rules'];
 
             if (is_string($rules)) {
@@ -176,12 +174,12 @@ class Validation implements ValidationInterface
 
                 $values = array_filter(
                     $flattenedArray,
-                    static fn ($key): bool => preg_match(self::getRegex($field), $key) === 1,
+                    static fn ($key) => preg_match(self::getRegex($field), $key),
                     ARRAY_FILTER_USE_KEY
                 );
 
                 // if keys not found
-                $values = $values !== [] ? $values : [$field => null];
+                $values = $values ?: [$field => null];
             } else {
                 $values = dot_array_search($field, $data);
             }
@@ -413,7 +411,7 @@ class Validation implements ValidationInterface
             }
 
             // Otherwise remove the if_exist rule and continue the process
-            $rules = array_filter($rules, static fn ($rule): bool => $rule instanceof Closure || $rule !== 'if_exist');
+            $rules = array_filter($rules, static fn ($rule) => $rule instanceof Closure || $rule !== 'if_exist');
         }
 
         return $rules;
@@ -455,19 +453,19 @@ class Validation implements ValidationInterface
                     }
                 }
 
-                if ($passed) {
+                if ($passed === true) {
                     return true;
                 }
             }
 
-            $rules = array_filter($rules, static fn ($rule): bool => $rule instanceof Closure || $rule !== 'permit_empty');
+            $rules = array_filter($rules, static fn ($rule) => $rule instanceof Closure || $rule !== 'permit_empty');
         }
 
         return $rules;
     }
 
     /**
-     * @param Closure(bool|float|int|list<mixed>|object|string|null, bool|float|int|list<mixed>|object|string|null, string|null, string|null): (bool|string) $rule
+     * @param Closure|string $rule
      */
     private function isClosure($rule): bool
     {
@@ -795,7 +793,7 @@ class Validation implements ValidationInterface
                     $placeholderFields = $this->retrievePlaceholders($row, $data);
 
                     foreach ($placeholderFields as $field) {
-                        $validator ??= service('validation', null, false);
+                        $validator ??= Services::validation(null, false);
                         assert($validator instanceof Validation);
 
                         $placeholderRules = $rules[$field]['rules'] ?? null;
@@ -867,7 +865,7 @@ class Validation implements ValidationInterface
 
         $errors = array_filter(
             $this->getErrors(),
-            static fn ($key): bool => preg_match(self::getRegex($field), $key) === 1,
+            static fn ($key) => preg_match(self::getRegex($field), $key),
             ARRAY_FILTER_USE_KEY
         );
 
@@ -918,24 +916,26 @@ class Validation implements ValidationInterface
     ): string {
         $param ??= '';
 
-        $args = [
-            'field' => ($label === null || $label === '') ? $field : lang($label),
-            'param' => (! isset($this->rules[$param]['label'])) ? $param : lang($this->rules[$param]['label']),
-            'value' => $value ?? '',
-        ];
-
         // Check if custom message has been defined by user
         if (isset($this->customErrors[$field][$rule])) {
-            return lang($this->customErrors[$field][$rule], $args);
-        }
-        if (null !== $originalField && isset($this->customErrors[$originalField][$rule])) {
-            return lang($this->customErrors[$originalField][$rule], $args);
+            $message = lang($this->customErrors[$field][$rule]);
+        } elseif (null !== $originalField && isset($this->customErrors[$originalField][$rule])) {
+            $message = lang($this->customErrors[$originalField][$rule]);
+        } else {
+            // Try to grab a localized version of the message...
+            // lang() will return the rule name back if not found,
+            // so there will always be a string being returned.
+            $message = lang('Validation.' . $rule);
         }
 
-        // Try to grab a localized version of the message...
-        // lang() will return the rule name back if not found,
-        // so there will always be a string being returned.
-        return lang('Validation.' . $rule, $args);
+        $message = str_replace('{field}', ($label === null || $label === '') ? $field : lang($label), $message);
+        $message = str_replace(
+            '{param}',
+            (! isset($this->rules[$param]['label'])) ? $param : lang($this->rules[$param]['label']),
+            $message
+        );
+
+        return str_replace('{value}', $value ?? '', $message);
     }
 
     /**

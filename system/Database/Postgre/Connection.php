@@ -74,11 +74,11 @@ class Connection extends BaseConnection
             $this->convertDSN();
         }
 
-        $this->connID = $persistent ? pg_pconnect($this->DSN) : pg_connect($this->DSN);
+        $this->connID = $persistent === true ? pg_pconnect($this->DSN) : pg_connect($this->DSN);
 
         if ($this->connID !== false) {
             if (
-                $persistent
+                $persistent === true
                 && pg_connection_status($this->connID) === PGSQL_CONNECTION_BAD
                 && pg_ping($this->connID) === false
             ) {
@@ -149,9 +149,8 @@ class Connection extends BaseConnection
      */
     public function reconnect()
     {
-        if ($this->connID === false || pg_ping($this->connID) === false) {
-            $this->close();
-            $this->initialize();
+        if (pg_ping($this->connID) === false) {
+            $this->connID = false;
         }
     }
 
@@ -290,7 +289,7 @@ class Connection extends BaseConnection
             return $sql . ' AND "table_name" LIKE ' . $this->escape($tableName);
         }
 
-        if ($prefixLimit && $this->DBPrefix !== '') {
+        if ($prefixLimit !== false && $this->DBPrefix !== '') {
             return $sql . ' AND "table_name" LIKE \''
                 . $this->escapeLikeString($this->DBPrefix) . "%' "
                 . sprintf($this->likeEscapeStr, $this->likeEscapeChar);
@@ -371,7 +370,7 @@ class Connection extends BaseConnection
             $obj         = new stdClass();
             $obj->name   = $row->indexname;
             $_fields     = explode(',', preg_replace('/^.*\((.+?)\)$/', '$1', trim($row->indexdef)));
-            $obj->fields = array_map(static fn ($v): string => trim($v), $_fields);
+            $obj->fields = array_map(static fn ($v) => trim($v), $_fields);
 
             if (str_starts_with($row->indexdef, 'CREATE UNIQUE INDEX pk')) {
                 $obj->type = 'PRIMARY';
@@ -463,7 +462,7 @@ class Connection extends BaseConnection
     {
         return [
             'code'    => '',
-            'message' => pg_last_error($this->connID),
+            'message' => pg_last_error($this->connID) ?: '',
         ];
     }
 

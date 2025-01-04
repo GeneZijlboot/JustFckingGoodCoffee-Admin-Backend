@@ -13,6 +13,7 @@ declare(strict_types=1);
 
 use CodeIgniter\Boot;
 use Config\Paths;
+use Config\Services;
 
 error_reporting(E_ALL);
 ini_set('display_errors', '1');
@@ -87,4 +88,4 @@ Boot::bootTest($paths);
  * ---------------------------------------------------------------
  */
 
-service('routes')->loadRoutes();
+Services::routes()->loadRoutes();

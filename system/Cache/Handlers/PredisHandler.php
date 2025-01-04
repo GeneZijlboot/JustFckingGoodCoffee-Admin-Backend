@@ -19,7 +19,6 @@ use Config\Cache;
 use Exception;
 use Predis\Client;
 use Predis\Collection\Iterator\Keyspace;
-use Predis\Response\Status;
 
 /**
  * Predis cache handler
@@ -122,7 +121,7 @@ class PredisHandler extends BaseHandler
                 return false;
         }
 
-        if (! $this->redis->hmset($key, ['__ci_type' => $dataType, '__ci_value' => $value]) instanceof Status) {
+        if (! $this->redis->hmset($key, ['__ci_type' => $dataType, '__ci_value' => $value])) {
             return false;
         }
 

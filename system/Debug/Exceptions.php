@@ -22,6 +22,7 @@ use CodeIgniter\HTTP\RequestInterface;
 use CodeIgniter\HTTP\ResponseInterface;
 use Config\Exceptions as ExceptionsConfig;
 use Config\Paths;
+use Config\Services;
 use ErrorException;
 use Psr\Log\LogLevel;
 use Throwable;
@@ -125,7 +126,7 @@ class Exceptions
 
         [$statusCode, $exitCode] = $this->determineCodes($exception);
 
-        $this->request = service('request');
+        $this->request = Services::request();
 
         if ($this->config->log === true && ! in_array($statusCode, $this->config->ignoreCodes, true)) {
             $uri       = $this->request->getPath() === '' ? '/' : $this->request->getPath();
@@ -154,7 +155,7 @@ class Exceptions
             }
         }
 
-        $this->response = service('response');
+        $this->response = Services::response();
 
         if (method_exists($this->config, 'handler')) {
             // Use new ExceptionHandler

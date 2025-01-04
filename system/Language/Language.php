@@ -206,11 +206,11 @@ class Language
 
             $argsString = implode(
                 ', ',
-                array_map(static fn ($element): string => '"' . $element . '"', $args)
+                array_map(static fn ($element) => '"' . $element . '"', $args)
             );
             $argsUrlEncoded = implode(
                 ', ',
-                array_map(static fn ($element): string => '"' . rawurlencode($element) . '"', $args)
+                array_map(static fn ($element) => '"' . rawurlencode($element) . '"', $args)
             );
 
             log_message(

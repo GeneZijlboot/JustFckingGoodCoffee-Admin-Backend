@@ -210,7 +210,7 @@ interface ResponseInterface extends MessageInterface
     /**
      * Converts the $body into JSON and sets the Content Type header.
      *
-     * @param array|object|string $body
+     * @param array|string $body
      *
      * @return $this
      */

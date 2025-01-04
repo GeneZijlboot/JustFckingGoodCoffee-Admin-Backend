@@ -13,6 +13,8 @@ declare(strict_types=1);
 
 namespace CodeIgniter\Debug\Toolbar\Collectors;
 
+use Config\Services;
+
 /**
  * Timers collector
  */
@@ -50,7 +52,7 @@ class Timers extends BaseCollector
     {
         $data = [];
 
-        $benchmark = service('timer', true);
+        $benchmark = Services::timer(true);
         $rows      = $benchmark->getTimers(6);
 
         foreach ($rows as $name => $info) {

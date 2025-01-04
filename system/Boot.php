@@ -196,16 +196,7 @@ class Boot
 
         // The path to the writable directory.
         if (! defined('WRITEPATH')) {
-            $writePath = realpath(rtrim($paths->writableDirectory, '\\/ '));
-
-            if ($writePath === false) {
-                header('HTTP/1.1 503 Service Unavailable.', true, 503);
-                echo 'The WRITEPATH is not set correctly.';
-
-                // EXIT_ERROR is not yet defined
-                exit(1);
-            }
-            define('WRITEPATH', $writePath . DIRECTORY_SEPARATOR);
+            define('WRITEPATH', realpath(rtrim($paths->writableDirectory, '\\/ ')) . DIRECTORY_SEPARATOR);
         }
 
         // The path to the tests directory
@@ -255,12 +246,12 @@ class Boot
 
     protected static function autoloadHelpers(): void
     {
-        service('autoloader')->loadHelpers();
+        Services::autoloader()->loadHelpers();
     }
 
     protected static function setExceptionHandler(): void
     {
-        service('exceptions')->initialize();
+        Services::exceptions()->initialize();
     }
 
     protected static function checkMissingExtensions(): void
@@ -299,7 +290,7 @@ class Boot
 
     protected static function initializeKint(): void
     {
-        service('autoloader')->initializeKint(CI_DEBUG);
+        Services::autoloader()->initializeKint(CI_DEBUG);
     }
 
     protected static function loadConfigCache(): FactoriesCache
@@ -317,7 +308,7 @@ class Boot
      */
     protected static function initializeCodeIgniter(): CodeIgniter
     {
-        $app = service('codeigniter');
+        $app = Config\Services::codeigniter();
         $app->initialize();
         $context = is_cli() ? 'php-cli' : 'web';
         $app->setContext($context);

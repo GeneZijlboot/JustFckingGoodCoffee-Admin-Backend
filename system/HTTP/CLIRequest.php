@@ -95,7 +95,9 @@ class CLIRequest extends Request
      */
     public function getPath(): string
     {
-        return implode('/', $this->segments);
+        $path = implode('/', $this->segments);
+
+        return ($path === '') ? '' : $path;
     }
 
     /**

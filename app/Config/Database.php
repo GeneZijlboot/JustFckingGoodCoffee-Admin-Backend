@@ -24,12 +24,14 @@ class Database extends Config
      *
      * @var array<string, mixed>
      */
+
+    /* live database */
     public array $default = [
         'DSN'          => '',
-        'hostname'     => 'localhost',
-        'username'     => '',
-        'password'     => '',
-        'database'     => '',
+        'hostname'     => '134.209.202.149',
+        'username'     => 'admin',
+        'password'     => 'i42Dndf393DnklU38sn@KsirM8Rra',
+        'database'     => 'JustFuckingGoodCoffeeDBLive',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,

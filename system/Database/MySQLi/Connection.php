@@ -57,7 +57,7 @@ class Connection extends BaseConnection
     /**
      * MySQLi object
      *
-     * Has to be preserved without being assigned to $connId.
+     * Has to be preserved without being assigned to $conn_id.
      *
      * @var false|mysqli
      */
@@ -96,7 +96,7 @@ class Connection extends BaseConnection
             $port     = null;
             $socket   = $this->hostname;
         } else {
-            $hostname = $persistent ? 'p:' . $this->hostname : $this->hostname;
+            $hostname = ($persistent === true) ? 'p:' . $this->hostname : $this->hostname;
             $port     = empty($this->port) ? null : $this->port;
             $socket   = '';
         }
@@ -193,7 +193,7 @@ class Connection extends BaseConnection
                 $clientFlags
             )) {
                 // Prior to version 5.7.3, MySQL silently downgrades to an unencrypted connection if SSL setup fails
-                if (($clientFlags & MYSQLI_CLIENT_SSL) !== 0 && version_compare($this->mysqli->client_info, 'mysqlnd 5.7.3', '<=')
+                if (($clientFlags & MYSQLI_CLIENT_SSL) && version_compare($this->mysqli->client_info, 'mysqlnd 5.7.3', '<=')
                     && empty($this->mysqli->query("SHOW STATUS LIKE 'ssl_cipher'")->fetch_object()->Value)
                 ) {
                     $this->mysqli->close();
@@ -297,7 +297,7 @@ class Connection extends BaseConnection
     /**
      * Executes the query against the database.
      *
-     * @return false|mysqli_result
+     * @return false|mysqli_result;
      */
     protected function execute(string $sql)
     {
@@ -395,11 +395,11 @@ class Connection extends BaseConnection
     {
         $sql = 'SHOW TABLES FROM ' . $this->escapeIdentifier($this->database);
 
-        if ((string) $tableName !== '') {
+        if ($tableName !== null) {
             return $sql . ' LIKE ' . $this->escape($tableName);
         }
 
-        if ($prefixLimit && $this->DBPrefix !== '') {
+        if ($prefixLimit !== false && $this->DBPrefix !== '') {
             return $sql . " LIKE '" . $this->escapeLikeStringDirect($this->DBPrefix) . "%'";
         }
 
@@ -462,9 +462,7 @@ class Connection extends BaseConnection
             throw new DatabaseException(lang('Database.failGetIndexData'));
         }
 
-        $indexes = $query->getResultArray();
-
-        if ($indexes === []) {
+        if (! $indexes = $query->getResultArray()) {
             return [];
         }
 

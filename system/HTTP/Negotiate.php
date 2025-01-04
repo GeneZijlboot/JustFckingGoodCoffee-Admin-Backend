@@ -39,7 +39,7 @@ class Negotiate
      */
     public function __construct(?RequestInterface $request = null)
     {
-        if ($request instanceof RequestInterface) {
+        if ($request !== null) {
             assert($request instanceof IncomingRequest);
 
             $this->request = $request;
@@ -233,7 +233,7 @@ class Negotiate
         }
 
         // Sort to get the highest results first
-        usort($results, static function ($a, $b): int {
+        usort($results, static function ($a, $b) {
             if ($a['q'] === $b['q']) {
                 $aAst = substr_count($a['value'], '*');
                 $bAst = substr_count($b['value'], '*');
