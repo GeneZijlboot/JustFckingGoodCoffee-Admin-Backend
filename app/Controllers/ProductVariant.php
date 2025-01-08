@@ -3,14 +3,14 @@
 namespace App\Controllers;
  
 //define models
-use App\Models\Products;
+use App\Models\ProductVariants;
 
-class Product extends BaseController
+class ProductVariant extends BaseController
 {
     //constructor function
     public function __construct() {
         //products Model
-        $this->productsModel = model(Products::class);
+        $this->ProductVariant = model(ProductVariants::class);
     }
 
     //get all users
@@ -24,8 +24,11 @@ class Product extends BaseController
         $currentUser = $session->get('currentUser');
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-            if (!$status = $this->productsModel->getAll($data)) {
-                //error ? doesnt matter...
+            if ($status = $this->ProductVariant->getAll($data)) {
+                foreach ($data as &$product_variant) { // Use a reference to modify the actual array element
+                    $product_variant['product_variant_name'] = $product_variant['product_id'] . ' - ' . $product_variant['product_name'];
+                }
+                unset($product_variant); // Unset the reference after the loop to avoid unintended side effects
             }
         } else {
             $message = 'not.logged.in';

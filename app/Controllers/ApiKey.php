@@ -3,14 +3,14 @@
 namespace App\Controllers;
  
 //define models
-use App\Models\Products;
+use App\Models\ApiKeys;
 
-class Product extends BaseController
+class ApiKey extends BaseController
 {
     //constructor function
     public function __construct() {
         //products Model
-        $this->productsModel = model(Products::class);
+        $this->apiKeysModel = model(ApiKeys::class);
     }
 
     //get all users
@@ -24,7 +24,7 @@ class Product extends BaseController
         $currentUser = $session->get('currentUser');
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-            if (!$status = $this->productsModel->getAll($data)) {
+            if (!$status = $this->apiKeysModel->getAll($data)) {
                 //error ? doesnt matter...
             }
         } else {

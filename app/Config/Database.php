@@ -28,10 +28,10 @@ class Database extends Config
     /* live database */
     public array $default = [
         'DSN'          => '',
-        'hostname'     => '134.209.202.149',
+        'hostname'     => 'justfckinggoodcoffee.com',
         'username'     => 'admin',
         'password'     => 'i42Dndf393DnklU38sn@KsirM8Rra',
-        'database'     => 'JustFuckingGoodCoffeeDBLive',
+        'database'     => 'JustFckingGoodCoffeeDBLive',
         'DBDriver'     => 'MySQLi',
         'DBPrefix'     => '',
         'pConnect'     => false,
