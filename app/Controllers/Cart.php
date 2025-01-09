@@ -27,6 +27,7 @@ class Cart extends BaseController
                 foreach ($data as &$cart) { // Use a reference to modify the actual array element
                     $cart['cart_user'] = $cart['user_id'] . ' - ' . $cart['first_name'] . ' ' . $cart['last_name'];
                     $cart['cart_product'] = $cart['product_id'] . ' - ' . $cart['product_name'];
+                    $cart['controller'] = 'Cart';
                 }
                 unset($cart); // Unset the reference after the loop to avoid unintended side effects
             }

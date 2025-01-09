@@ -27,6 +27,7 @@ class ProductVariant extends BaseController
             if ($status = $this->ProductVariant->getAll($data)) {
                 foreach ($data as &$product_variant) { // Use a reference to modify the actual array element
                     $product_variant['product_variant_name'] = $product_variant['product_id'] . ' - ' . $product_variant['product_name'];
+                    $product_variant['controller'] = 'ProductVariant';
                 }
                 unset($product_variant); // Unset the reference after the loop to avoid unintended side effects
             }

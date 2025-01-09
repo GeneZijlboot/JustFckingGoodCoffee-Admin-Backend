@@ -25,7 +25,10 @@ class ApiKey extends BaseController
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
             if (!$status = $this->apiKeysModel->getAll($data)) {
-                //error ? doesnt matter...
+                foreach ($data as &$api_key) { // Use a reference to modify the actual array element
+                    $api_key['controller'] = 'Cart';
+                }
+                unset($api_key); // Unset the reference after the loop to avoid unintended side effects
             }
         } else {
             $message = 'not.logged.in';

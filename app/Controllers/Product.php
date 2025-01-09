@@ -25,7 +25,10 @@ class Product extends BaseController
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
             if (!$status = $this->productsModel->getAll($data)) {
-                //error ? doesnt matter...
+                foreach ($data as &$product) { // Use a reference to modify the actual array element
+                    $product['controller'] = 'Product';
+                }
+                unset($product); // Unset the reference after the loop to avoid unintended side effects
             }
         } else {
             $message = 'not.logged.in';

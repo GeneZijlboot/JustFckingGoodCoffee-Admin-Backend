@@ -48,4 +48,22 @@ class Users extends Model
             return false;
         }
     }
+
+    public function DeleteById($user_id) {
+        // Check if the user exists
+        $userResult = $this->builder()
+                           ->where('id', $user_id)
+                           ->get();
+    
+        if ($userResult->getNumRows() > 0) {
+            // User exists, proceed to delete
+            $this->builder()
+                 ->where('id', $user_id)
+                 ->delete();
+    
+            return true; // Successfully deleted
+        } else {
+            return false; // User not found
+        }
+    }
 }
