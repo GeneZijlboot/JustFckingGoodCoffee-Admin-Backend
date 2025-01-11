@@ -80,17 +80,16 @@ class Role extends BaseController
     public function deleteRole() {
         //define variables
         $message = null;
-        $data = [];
-
-        //define url parameter
-        $user_id = $this->request->getPostGet('id');
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+        ];
 
         //getsession
         $session = session();
         $currentUser = $session->get('currentUser');
     
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-            if ($status = $this->rolesModel->DeleteById($user_id)) {
+            if ($status = $this->rolesModel->DeleteById($data)) {
                 $message = 'succesfully.deleted.user';
             }
         } else {

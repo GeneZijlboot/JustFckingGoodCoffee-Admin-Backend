@@ -27,10 +27,10 @@ class Roles extends Model
         }
     }
 
+    //insert given Role
     public function insertRole($data) {
         // Check if a role with the same name already exists
         $existingRole = $this->builder
-                             ->select('id, name')
                              ->where('name', $data['name'])
                              ->get();
     
@@ -44,7 +44,6 @@ class Roles extends Model
     
         // Retrieve the newly created role to confirm
         $newRole = $this->builder
-                        ->select('id, name')
                         ->where('name', $data['name'])
                         ->get();
     
@@ -57,6 +56,7 @@ class Roles extends Model
         return false;
     }
     
+    //delete by id
     public function DeleteById($role_id) {
         // Check if the user exists
         $roleResult = $this->builder()

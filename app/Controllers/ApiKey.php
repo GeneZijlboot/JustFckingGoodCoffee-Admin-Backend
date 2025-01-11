@@ -53,4 +53,61 @@ class ApiKey extends BaseController
         //return response back to frontend -> in JSON format
         return $this->response->setJSON($response_data);
     }
+
+    public function createApiKey() {
+        //define variables
+        $message = null;
+        $data = [
+            'provider' => $this->request->getPostGet('provider'),
+            'public_key' => $this->request->getPostGet('public_key'),
+            'secret_key' => $this->request->getPostGet('secret_key'),
+        ];
+
+        //insert new role
+        if ($status = $this->apiKeysModel->insertApiKey($data)) {
+            $message = 'succesfully.created.api-key';
+        } else {
+            $message = 'api-key.already.exists';
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    public function deleteApiKey() {
+        //define variables
+        $message = null;
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+        ];
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+    
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            if ($status = $this->apiKeysModel->DeleteById($data)) {
+                $message = 'succesfully.deleted.user';
+            }
+        } else {
+            $message = 'not.logged.in';
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
 }
