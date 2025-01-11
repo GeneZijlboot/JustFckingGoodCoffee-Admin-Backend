@@ -30,6 +30,15 @@ class ProductVariant extends BaseController
                     $product_variant['controller'] = 'ProductVariant';
                 }
                 unset($product_variant); // Unset the reference after the loop to avoid unintended side effects
+            
+                //define table headers
+                $data['field_headers'] = [
+                    '#',
+                    'Product',
+                    'Weight',
+                    'Price',
+                    '', //for the CRUD icons
+                ];
             }
         } else {
             $message = 'not.logged.in';

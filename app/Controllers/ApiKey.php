@@ -24,11 +24,20 @@ class ApiKey extends BaseController
         $currentUser = $session->get('currentUser');
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-            if (!$status = $this->apiKeysModel->getAll($data)) {
+            if ($status = $this->apiKeysModel->getAll($data)) {
                 foreach ($data as &$api_key) { // Use a reference to modify the actual array element
-                    $api_key['controller'] = 'Cart';
+                    $api_key['controller'] = 'ApiKey';
                 }
                 unset($api_key); // Unset the reference after the loop to avoid unintended side effects
+
+                //define table headers
+                $data['field_headers'] = [
+                    '#',
+                    'Provider',
+                    'Public Key',
+                    'Secret Key',
+                    '', //for the CRUD icons
+                ];  
             }
         } else {
             $message = 'not.logged.in';

@@ -125,8 +125,26 @@ class User extends BaseController
                 foreach ($data as &$user) { // Use a reference to modify the actual array element
                     $user['user_role'] = $user['user_role_id'] . ' - ' . $user['role_name'];
                     $user['controller'] = 'User';
+                    
                 }
                 unset($user); // Unset the reference after the loop to avoid unintended side effects
+                
+                //define table headers
+                $data['field_headers'] = [
+                    '#',
+                    'Role',
+                    'First name',
+                    'Last name',
+                    'Email',
+                    'Phone number',
+                    'Street name',
+                    'House number',
+                    'City',
+                    'Zipcode',
+                    'Subscription',
+                    'Member from',
+                    '', //for the CRUD icons
+                ];
             }
         } else {
             $message = 'not.logged.in';
@@ -143,36 +161,73 @@ class User extends BaseController
         return $this->response->setJSON($response_data);
     }
 
-
     //delete by id
-    public function DeleteById() {
-            //define variables
-            $message = null;
-            $data = [];
+    public function deleteUser() {
+        //define variables
+        $message = null;
+        $data = [];
 
-            //define url parameter
-            $user_id = $this->request->getPostGet('id');
+        //define url parameter
+        $user_id = $this->request->getPostGet('id');
 
-            //getsession
-            $session = session();
-            $currentUser = $session->get('currentUser');
-        
-            if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-                if ($status = $this->usersModel->DeleteById($user_id)) {
-                    $message = 'succesfully.deleted.user';
-                }
-            } else {
-                $message = 'not.logged.in';
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+    
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            if ($status = $this->usersModel->DeleteById($user_id)) {
+                $message = 'succesfully.deleted.user';
             }
-    
-            //define response data
-            $response_data = [
-                'status' => $status,
-                'data' => $data,
-                'message' => $message
-            ];
-    
-            //return response back to frontend -> in JSON format
-            return $this->response->setJSON($response_data);
+        } else {
+            $message = 'not.logged.in';
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
     }
+
+    //function tp create a user
+    // public function createUser() {
+    //     //define variables
+    //     $message = null;
+    //     $data = [
+    //         'first_name' => $this->request->getPostGet('first_name'),
+    //         'last_name' => $this->request->getPostGet('last_name'),
+    //         'email' => $this->request->getPostGet('email'),
+    //         'phone_number' => $this->request->getPostGet('phone_number'),
+    //         'city' => $this->request->getPostGet('city'),
+    //         'zipcode' => $this->request->getPostGet('zipcode'),
+    //         'street_name' => $this->request->getPostGet('street_name'),
+    //         'house_number' => $this->request->getPostGet('house_number'),
+    //     ];
+
+    //      //getsession
+    //      $session = session();
+    //      $currentUser = $session->get('currentUser');
+     
+    //     if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+    //         if ($status $this->usersModel->insertUser($data)) {
+    //             $message = 'succesfully.created.user';
+    //         }
+    //     } else {
+    //         $message = 'not.logged.in';
+    //     }
+
+    //     //define response data
+    //     $response_data = [
+    //         'status' => $status,
+    //         'data' => $data,
+    //         'message' => $message
+    //     ];
+
+    //     //return response back to frontend -> in JSON format
+    //     return $this->response->setJSON($response_data);
+    // }
 }

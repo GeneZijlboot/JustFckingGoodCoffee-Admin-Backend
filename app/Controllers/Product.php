@@ -24,11 +24,26 @@ class Product extends BaseController
         $currentUser = $session->get('currentUser');
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-            if (!$status = $this->productsModel->getAll($data)) {
+            if ($status = $this->productsModel->getAll($data)) {
                 foreach ($data as &$product) { // Use a reference to modify the actual array element
                     $product['controller'] = 'Product';
                 }
                 unset($product); // Unset the reference after the loop to avoid unintended side effects
+
+                //define table headers
+                $data['field_headers'] = [
+                    '#',
+                    'Name',
+                    'Image',
+                    'Infobar image',
+                    'Roast type',
+                    'Origin',
+                    'Description',
+                    'Data',
+                    'Information',
+                    'Reviews',
+                    '', //for the CRUD icons
+                ];
             }
         } else {
             $message = 'not.logged.in';

@@ -30,6 +30,16 @@ class Cart extends BaseController
                     $cart['controller'] = 'Cart';
                 }
                 unset($cart); // Unset the reference after the loop to avoid unintended side effects
+
+                //define table headers
+                $data['field_headers'] = [
+                    '#',
+                    'User',
+                    'Product',
+                    'Variant',
+                    'Quantity',
+                    '', //for the CRUD icons
+                ]; 
             }
         } else {
             $message = 'not.logged.in';
