@@ -193,41 +193,105 @@ class User extends BaseController
         return $this->response->setJSON($response_data);
     }
 
-    //function tp create a user
-    // public function createUser() {
-    //     //define variables
-    //     $message = null;
-    //     $data = [
-    //         'first_name' => $this->request->getPostGet('first_name'),
-    //         'last_name' => $this->request->getPostGet('last_name'),
-    //         'email' => $this->request->getPostGet('email'),
-    //         'phone_number' => $this->request->getPostGet('phone_number'),
-    //         'city' => $this->request->getPostGet('city'),
-    //         'zipcode' => $this->request->getPostGet('zipcode'),
-    //         'street_name' => $this->request->getPostGet('street_name'),
-    //         'house_number' => $this->request->getPostGet('house_number'),
-    //     ];
+     //register function 
+     public function createUser() {
+        //set parameters
+        $message = null;
+        $data = [
+            'first_name' => $this->request->getPostGet('first_name'),
+            'last_name' => $this->request->getPostGet('last_name'),
+            'email' => $this->request->getPostGet('email'),
+            'phone_number' => $this->request->getPostGet('phone_number'),
+            'password' => $this->request->getPostGet('password'),
+            'password_confirm' => $this->request->getPostGet('password_confirm'),
+        ];
 
-    //      //getsession
-    //      $session = session();
-    //      $currentUser = $session->get('currentUser');
-     
-    //     if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-    //         if ($status $this->usersModel->insertUser($data)) {
-    //             $message = 'succesfully.created.user';
-    //         }
-    //     } else {
-    //         $message = 'not.logged.in';
-    //     }
+        //get optional fields
+        $optionalFields = ['city', 'zipcode', 'street_name', 'house_number'];
+        
+        foreach ($optionalFields as $field) {
+            $value = $this->request->getPostGet($field);
+            if (isset($value)) {
+                $data[$field] = $value;
+            }
+        }
 
-    //     //define response data
-    //     $response_data = [
-    //         'status' => $status,
-    //         'data' => $data,
-    //         'message' => $message
-    //     ];
+        //validation rules
+        $rules = [
+            'password' => 'required|max_length[255]|min_length[10]',
+            'password_confirm' => 'required|max_length[255]|matches[password]',
+            'email' => 'required|max_length[254]|valid_email',
+        ];
 
-    //     //return response back to frontend -> in JSON format
-    //     return $this->response->setJSON($response_data);
-    // }
+        //validateDate does the validation check
+        $validation = $this->validateData($data, $rules);
+
+        //validation succes
+        if ($status = $validation === true) {
+            //checks if inputted data exists in the database
+            $arrCheckEmail = [
+                'email' => $data['email'],
+            ];
+
+            //checks if inputted data exists in the database
+            if ($status = !$this->usersModel->checkIfEmailExists($arrCheckEmail)) {
+                //user doesnt exist yet so hash password
+                $createNewUser = [
+                    'user_role_id' => 2, //set the user_role_id standard to 2 -> 2 = customer
+                    'first_name' => $data['first_name'],
+                    'last_name' => $data['last_name'],
+                    'email' => $data['email'],
+                    'password' => password_hash($data['password'], PASSWORD_DEFAULT), //hash password
+                ];
+
+                // Add optional fields to the createNewUser array if they are set
+                foreach ($optionalFields as $field) {
+                    if (isset($data[$field])) {
+                        $createNewUser[$field] = $data[$field];
+                    }
+                }
+
+                if ($status = $this->usersModel->createUser($createNewUser)) {
+                    $message = 'succes.creating.user';
+                } else {
+                    $message = 'error.creating.user';
+                }
+            } else {
+                //user already exists
+                $data = [];
+                $message = 'user.already.exists'; 
+            }
+            
+        } else { //validation error
+            // Check if both password fields exist
+            if (!isset($data['password']) || !isset($data['password_confirm'])) {
+                $error_msg = 'password.fields.missing';  // error if password fields are missing
+            } else {
+                // Check if passwords match
+                if ($data['password'] !== $data['password_confirm']) {
+                    $error_msg = 'password.dont.match';  // error if passwords don't match
+                }
+                // Check if password is longer than 10 characters
+                else if (strlen($data['password']) < 10) {
+                    $error_msg = 'password.too.short';  // error if password is too short
+                }
+
+                // If there was any validation error, set the message
+                if (isset($error_msg)) {
+                    $data = [];  // Optional: clear $data or keep it if needed
+                    $message = $error_msg;
+                }
+            }
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
 }

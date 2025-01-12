@@ -106,4 +106,43 @@ class Role extends BaseController
         //return response back to frontend -> in JSON format
         return $this->response->setJSON($response_data);
     }
+
+    public function getOptions() {
+        // Initialize response variables
+        $message = null;
+        $data = [];
+        $status = false;
+    
+        // Get session and current user
+        $session = session();
+        $currentUser = $session->get('currentUser');
+    
+        // Check if a user is logged in and is an admin
+        if (isset($currentUser) && $currentUser["user_role_id"] == 1) {
+            // Fetch role options
+            $status = $this->rolesModel->getOptions($data);
+            if ($status) {
+                // Modify role names
+                foreach ($data as &$role) { 
+                    $role['name'] = $role['id'] . ' - ' . $role['name'];
+                }
+                unset($role); // Best practice: Unset reference after foreach loop
+                $message = 'successfully.got.role.options';
+            } else {
+                $message = 'failed.to.get.role.options';
+            }
+        } else {
+            $message = 'not.logged.in.or.not.admin';
+        }
+    
+        // Define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message,
+        ];
+    
+        // Return response back to frontend in JSON format
+        return $this->response->setJSON($response_data);
+    }
 }

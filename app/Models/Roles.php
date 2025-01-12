@@ -74,4 +74,17 @@ class Roles extends Model
             return false; // User not found
         }
     }
+
+    public function getOptions(&$data = []) {
+        $roleResult = $this->builder
+                                ->select('roles.id, roles.name')
+                                ->get();
+        //check if there are results and return them
+        if ($roleResult->getNumRows() > 0) {
+            $data = $roleResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
 }
