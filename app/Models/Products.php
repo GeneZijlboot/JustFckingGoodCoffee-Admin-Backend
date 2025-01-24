@@ -26,4 +26,53 @@ class Products extends Model
             return false;
         }
     }
+
+    //insert given Product
+    public function insertProduct($data) {
+        // Check if a role with the same name already exists
+        $existingProduct = $this->builder
+                             ->where('name', $data['name'])
+                             ->get();
+    
+        //if a match is found, return false
+        if ($existingProduct->getNumRows() > 0) {
+            var_dump($data['name']);
+            return false;
+        }
+    
+        //insert the new role
+        $this->builder->insert($data);
+    
+        // Retrieve the newly created role to confirm
+        $newProduct = $this->builder
+                        ->where('name', $data['name'])
+                        ->get();
+    
+        // If the new role is retrieved successfully, return true
+        if ($newProduct->getNumRows() > 0) {
+            return true;
+        }
+    
+        // Default return false in case of any issues
+        return false;
+    }
+
+    //delete by id
+    public function DeleteById($product_id) {
+        // Check if the user exists
+        $productExist = $this->builder()
+                            ->where('id', $product_id)
+                            ->get();
+    
+        if ($productExist->getNumRows() > 0) {
+            //user exists, proceed to delete
+            $this->builder()
+                    ->where('id', $product_id)
+                    ->delete();
+    
+            return true; //successfully deleted
+        } else {
+            return false; //user not found
+        }
+    }
 }
