@@ -178,50 +178,55 @@ class Product extends BaseController
     }
 
     public function saveImage() {
-        //define parameters
         $message = [];
+    
+        //define file save directory
+        $savePath = ROOTPATH . 'public/images';
+    
+        //ensure directory exists
+        if (!is_dir($savePath)) {
+            mkdir($savePath, 0755, true);
+        }
+    
+        //define validation rules
+        $validationRules = [
+            'productImageFile' => 'uploaded[productImageFile]|max_size[productImageFile,2048]|ext_in[productImageFile,png,jpg,jpeg]|is_image[productImageFile]',
+            'infobarImageFile' => 'uploaded[infobarImageFile]|max_size[infobarImageFile,2048]|ext_in[infobarImageFile,png,jpg,jpeg]|is_image[infobarImageFile]',
+        ];
+    
+        //retrieve files
         $data = [
             'productImageFile' => $this->request->getFile('productImageFile'),
             'infobarImageFile' => $this->request->getFile('infobarImageFile'),
         ];
 
-        //define file save directory
-        $savePath = ROOTPATH . 'public/images';
-        
-        //ensure directory exists
-        if (!is_dir($savePath)) {
-            mkdir($savePath, 0755, true); //create directory with the correct rights if it doesn't exist
-        }
-        
-        foreach ($data as $file) {
-            $fileName = $file->getName();
-            /*
-                TODO::
-                sometimes when a image is really large it cannot be uploaded so make some ci4 validation rules for it so a user understands what goes wrong.
-
-                and do make it asynchronously....... otherwise the requests go all at once, at you get 3 error messages through eah other..
-
-                -> build on localhost make controller for dev and prod.??
-            */
-            //check if the given file exists by file name
-            if ($status = file_exists($savePath . DIRECTORY_SEPARATOR . $fileName)) { //exists
-                $message = "Admin Backend - " . $fileName . " alread exist in: " . $savePath;
-            } else { //doesnt exists -> move give file there
-                if ($status =  $file->move($savePath, $fileName)) {
-                    $message = "Admin Backend - succesfully moved: " . $fileName . " to " . $savePath;
-                } else {
-                    $message = "Admin Backend - Unable to move: " . $fileName . " to " . $savePath;
+        //validate files
+        if ($status = $this->validate($validationRules)) {
+            foreach ($data as $file) {
+                $fileName = $file->getName();
+                //check if the given file exists by file name
+                if ($status = file_exists($savePath . DIRECTORY_SEPARATOR . $fileName)) { //exists
+                    $message = "Admin Backend - " . $fileName . " alread exist in: " . $savePath;
+                } else { //doesnt exists -> move give file there
+                    if ($status =  $file->move($savePath, $fileName)) {
+                        $message = "Admin Backend - succesfully moved: " . $fileName . " to " . $savePath;
+                    } else {
+                        $message = "Admin Backend - Unable to move: " . $fileName . " to " . $savePath;
+                    }
                 }
             }
+        } else {
+            $validationErrors = $this->validator->getErrors();
+            $message = implode("\n", $validationErrors);
         }
-        
+
         //define response data
         $response_data = [
             'status' => $status,
             'data' => $data,
             'message' => $message,
         ];
-
+    
         //return response in JSON format
         return $this->response->setJSON($response_data);
     }
