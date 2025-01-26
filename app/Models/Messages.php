@@ -89,4 +89,17 @@ class Messages extends Model
         }
     }
     
+    public function getProductFieldTranslation(&$product) {
+        $messageResult = $this->builder
+                                ->select('messages.message')
+                                ->where('name', $product)
+                                ->get();
+        //check if there are results and return them
+        if ($messageResult->getNumRows() > 0) {
+            $product = $messageResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
 }

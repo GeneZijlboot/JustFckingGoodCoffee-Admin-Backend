@@ -54,4 +54,34 @@ class ProductVariant extends BaseController
         //return response back to frontend -> in JSON format
         return $this->response->setJSON($response_data);
     }
+
+    public function deleteProductVariant() {
+        //define variables
+        $message = null;
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+        ];
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+    
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            if ($status = $this->ProductVariant->DeleteById($data)) {
+                $message = 'succesfully.deleted.product_variant';
+            }
+        } else {
+            $message = 'not.logged.in';
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
 }

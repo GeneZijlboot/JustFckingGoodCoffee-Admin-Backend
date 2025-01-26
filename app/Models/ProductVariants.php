@@ -28,7 +28,7 @@ class ProductVariants extends Model
         }
     }
 
-    //insert given message
+    //insert given product vairant
     public function insertProductVariant($data) {
         // Check if a role with the same name already exists
         $existinProductVariant = $this->builder
@@ -57,5 +57,24 @@ class ProductVariants extends Model
 
         // Default return false in case of any issues
         return false;
+    }
+
+    //delete by id
+    public function DeleteById($productvariant_id) {
+        // Check if the user exists
+        $productVariantResult = $this->builder()
+                            ->where('id', $productvariant_id)
+                            ->get();
+    
+        if ($productVariantResult->getNumRows() > 0) {
+            // User exists, proceed to delete
+            $this->builder()
+                    ->where('id', $productvariant_id)
+                    ->delete();
+    
+            return true; // Successfully deleted
+        } else {
+            return false; // User not found
+        }
     }
 }

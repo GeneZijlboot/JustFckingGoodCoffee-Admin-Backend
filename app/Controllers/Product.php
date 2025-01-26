@@ -29,8 +29,22 @@ class Product extends BaseController
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
             if ($status = $this->productsModel->getAll($data)) {
-                foreach ($data as &$product) { // Use a reference to modify the actual array element
+
+                $fields = ['description', 'data', 'information', 'reviews'];
+                //loop through every row and add the product controller to it
+                foreach ($data as &$product) {
                     $product['controller'] = 'Product';
+
+                    // // Loop translation fields
+                    // foreach ($fields as $field) {
+                    //     $column_name = $product['name'] . '.' . $product[$field];
+                    //     // get the tranlation per field
+                    //     if ($status = $this->messagesModel->getProductFieldTranslation($column_name)) {
+                    //         $product[$field] = $column_name;
+                    //     } else {
+                    //         $message = 'unable.to.get.' . $field . '.translation';
+                    //     }
+                    // }
                 }
                 unset($product); // Unset the reference after the loop to avoid unintended side effects
 
@@ -69,8 +83,8 @@ class Product extends BaseController
         $message = null;
         $data = [
             'product_name' => $this->request->getPostGet('product_name'),
-            'image_url' => '/images/' . basename(parse_url($this->request->getPostGet('product_image_url'), PHP_URL_PATH)),
-            'infobar_image_url' => '/images/' . basename(parse_url($this->request->getPostGet('infobar_image_url'), PHP_URL_PATH)),
+            'image_url' => '/images/' . basename(parse_url($this->request->getPostGet('product_image_name'), PHP_URL_PATH)),
+            'infobar_image_url' => '/images/' . basename(parse_url($this->request->getPostGet('infobar_image_name'), PHP_URL_PATH)),
             'roast_type' => $this->request->getPostGet('roast_type'),
             'origin' => $this->request->getPostGet('origin'),
             'product_types' => json_decode($this->request->getPostGet('product_types'), true),
