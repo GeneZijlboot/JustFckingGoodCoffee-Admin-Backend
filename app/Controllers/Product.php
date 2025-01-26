@@ -35,16 +35,18 @@ class Product extends BaseController
                 foreach ($data as &$product) {
                     $product['controller'] = 'Product';
 
-                    // // Loop translation fields
-                    // foreach ($fields as $field) {
-                    //     $column_name = $product['name'] . '.' . $product[$field];
-                    //     // get the tranlation per field
-                    //     if ($status = $this->messagesModel->getProductFieldTranslation($column_name)) {
-                    //         $product[$field] = $column_name;
-                    //     } else {
-                    //         $message = 'unable.to.get.' . $field . '.translation';
-                    //     }
-                    // }
+                    // Loop translation fields
+                    foreach ($fields as $field) {
+                        $column_name = $product[$field];
+                        // get the tranlation per field
+                        if ($status = $this->messagesModel->getProductFieldTranslation($column_name)) {
+                            var_dump($column_name);
+                            $product[$field] = $column_name;
+                        } else {
+                            $message = 'unable.to.get.' . $field . '.translation';
+                        }
+                        die;
+                    }
                 }
                 unset($product); // Unset the reference after the loop to avoid unintended side effects
 
