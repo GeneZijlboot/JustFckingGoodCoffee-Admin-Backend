@@ -5,6 +5,7 @@ namespace App\Controllers;
 //define models
 use App\Models\Products;
 use App\Models\Messages;
+use App\Models\ProductVariants;
 
 class Product extends BaseController
 {
@@ -13,6 +14,7 @@ class Product extends BaseController
         //products Model
         $this->productsModel = model(Products::class);
         $this->messagesModel = model(Messages::class);
+        $this->productVariantsModel = model(ProductVariants::class);
     }
 
     //get all users
@@ -66,75 +68,87 @@ class Product extends BaseController
         //define variables
         $message = null;
         $data = [
-            'name' => $this->request->getPostGet('name'),
-            'image_url' => '/images/' . $this->request->getPostGet('image_url'),
-            'infobar_image_url' => '/images/' . $this->request->getPostGet('infobar_image_url'),
+            'product_name' => $this->request->getPostGet('product_name'),
+            'image_url' => '/images/' . basename(parse_url($this->request->getPostGet('product_image_url'), PHP_URL_PATH)),
+            'infobar_image_url' => '/images/' . basename(parse_url($this->request->getPostGet('infobar_image_url'), PHP_URL_PATH)),
             'roast_type' => $this->request->getPostGet('roast_type'),
             'origin' => $this->request->getPostGet('origin'),
-            'description' => $this->request->getPostGet('description'),
-            'data' => $this->request->getPostGet('data'),
-            'information' => $this->request->getPostGet('information'),
-            'language' => $this->request->getPostGet('language'),
+            'product_types' => json_decode($this->request->getPostGet('product_types'), true),
+            'translations' => json_decode($this->request->getPostGet('translations'), true),
         ];
 
-         //getsession
-         $session = session();
-         $currentUser = $session->get('currentUser');
- 
-         //check if a user is logged in and if admin
-         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) {
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
 
-            //build array for product to be inserted
+        //check if a user is logged in and if admin
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) {
+            //new array for product
             $newProduct = [
-                'name' => $this->request->getPostGet('name'),
-                'image_url' => '/images/' . $this->request->getPostGet('image_url'),
-                'infobar_image_url' => '/images/' . $this->request->getPostGet('infobar_image_url'),
+                'name' => $data['product_name'],
+                'image_url' => $data['image_url'],
+                'infobar_image_url' => $data['infobar_image_url'],
                 'roast_type' => $data['roast_type'],
                 'origin' => $data['origin'],
-                'description' => 'product_details.' . strtolower(str_replace(' ', '_', $data['name'])) . '.description',
-                'data' => 'product_details.' . strtolower(str_replace(' ', '_', $data['name'])) . '.data',
-                'information' => 'product_details.' . strtolower(str_replace(' ', '_', $data['name'])) . '.information',
+                'description' => 'product_details.' . strtolower(str_replace(' ', '_', $data['product_name'])) . '.description',
+                'data' => 'product_details.' . strtolower(str_replace(' ', '_', $data['product_name'])) . '.data',
+                'information' => 'product_details.' . strtolower(str_replace(' ', '_', $data['product_name'])) . '.information',
+                'reviews' => 'product_details.' . strtolower(str_replace(' ', '_', $data['product_name'])) . '.reviews',
             ];
 
-            //insert new product in product table
+            //post to product table
             if ($status = $this->productsModel->insertProduct($newProduct)) {
-                $message = 'succesfully.inserted.product';
-
-                // Prepare messages
-                $keys = ['description', 'data', 'information'];
-                $newMessages = [];
-
-                foreach ($keys as $key) {
-                    $newMessages[] = [
-                        'name' => 'product_details.' . strtolower(str_replace(' ', '_', $data['name'])) . '.' . $key,
-                        'language' => $data['language'],
-                        'message' => $this->request->getPostGet($key),
-                    ];
-                }
-
-                foreach($newMessages as $newMessage) {
-                    if ($status = $this->messagesModel->insertMessage($newMessage)) {
-                        $message = 'succesfully.inserted.product';
+                //new array for product type
+                $newProductType = [
+                    'product_id' => $newProduct['id'],
+                ];
+                foreach ($data['product_types'] as $product_type) {
+                    //set price
+                    $newProductType['price'] = $product_type['price'];
+                
+                    //check if 'weight' is set (since it could be NULL or missing in some cases)
+                    if (isset($product_type['weight']) && is_array($product_type['weight'])) {
+                        //set weight - assuming 'value' is what you want
+                        $newProductType['weight'] = $product_type['weight']['value'];
                     } else {
-                        $message = 'unsuccesfully.inserted.product';
+                        $newProductType['weight'] = NULL;
+                    }
+                    
+                    //post to product_variants table
+                    if (!($newProductType['weight'] == NULL || $newProductType['price'] == NULL)) {
+                        if (!($this->productVariantsModel->insertProductVariant($newProductType))) {
+                            $message = 'error.inserting.product_variant';
+                        }
+                    }
+                }
+                //new array for messages
+                $fields = ['description', 'data', 'information'];
+
+                // Loop through translations
+                foreach ($data['translations'] as $message) {
+                    foreach ($fields as $field) {
+                        // Check if the field has a value
+                        if (!empty($message[$field])) {
+                            // Build the message array
+                            $newMessage = [
+                                'language' => $message['selectedLanguage'],
+                                'name' => 'product_details.' . $data['product_name'] . '.' . $field,
+                                'message' => $message[$field],
+                            ];
+
+                            // Attempt to insert the message
+                            if (!($this->messagesModel->insertMessage($newMessage))) {
+                                $message = 'error.inserting.message';
+                            }
+                        }
                     }
                 }
             } else {
-                $message = 'unsuccesfully.inserted.product';
-                $data = [];
+                $message = 'error.inserting.product.name.already.exists';
             }
-         } else {
-             $message = 'not.logged.in';
-         }
-
-        /* 
-            TODO::
-            . in frontend wright the request to insert the 2 images in webshop project under public/assets/filename -> if this is correct, only then do a request to here and do these steps:
-            . define filepath for both images
-            . define the product data ( without the language )
-            . insert it, if thats correct make the array for the translations, loop do description, data, information
-            . then after that send back an okay status:
-        */
+        } else {
+            $message = 'not.logged.in';
+        }
 
         //define response data
         $response_data = [

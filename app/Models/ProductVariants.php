@@ -27,4 +27,35 @@ class ProductVariants extends Model
             return false;
         }
     }
+
+    //insert given message
+    public function insertProductVariant($data) {
+        // Check if a role with the same name already exists
+        $existinProductVariant = $this->builder
+                                        ->where('product_id', $data['product_id'])
+                                        ->where('weight', $data['weight'])
+                                        ->get();
+
+        //if a match is found, return false
+        if ($existinProductVariant->getNumRows() > 0) {
+            return false;
+        }
+
+        //insert the new role
+        $this->builder->insert($data);
+
+        // Retrieve the newly created role to confirm
+        $newProductVariant = $this->builder
+                            ->where('product_id', $data['product_id'])
+                            ->where('weight', $data['weight'])
+                            ->get();
+
+        // If the new role is retrieved successfully, return true
+        if ($newProductVariant->getNumRows() > 0) {
+            return true;
+        }
+
+        // Default return false in case of any issues
+        return false;
+    }
 }

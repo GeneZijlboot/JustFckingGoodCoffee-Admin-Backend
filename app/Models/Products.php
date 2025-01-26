@@ -28,7 +28,7 @@ class Products extends Model
     }
 
     //insert given Product
-    public function insertProduct($data) {
+    public function insertProduct(&$data) {
         // Check if a role with the same name already exists
         $existingProduct = $this->builder
                              ->where('name', $data['name'])
@@ -36,7 +36,6 @@ class Products extends Model
     
         //if a match is found, return false
         if ($existingProduct->getNumRows() > 0) {
-            var_dump($data['name']);
             return false;
         }
     
@@ -50,6 +49,7 @@ class Products extends Model
     
         // If the new role is retrieved successfully, return true
         if ($newProduct->getNumRows() > 0) {
+            $data['id'] = $newProduct->getRow()->id;
             return true;
         }
     
@@ -73,6 +73,23 @@ class Products extends Model
             return true; //successfully deleted
         } else {
             return false; //user not found
+        }
+    }
+
+    public function getIdByName(&$product) {
+        $productResult = $this->builder
+                              ->select('products.id')
+                              ->where('name', $product['name'])
+                              ->get();
+        
+        // Check if there are results and return the product ID
+        if ($productResult->getNumRows() > 0) {
+            // Get the first result (assumed to be the unique product)
+            $productData = $productResult->getRowArray();
+            $product['id'] = $productData['id'];  // Update the $product array with the ID
+            return true;  // Return true if product found
+        } else {
+            return false;  // Return false if no product found
         }
     }
 }
