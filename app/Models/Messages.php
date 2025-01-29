@@ -27,6 +27,20 @@ class Messages extends Model
         }
     }
 
+        //get all getWithLanguage messages
+        public function getWithLanguage(&$data = []) {
+            $messageResult = $this->builder
+                                    ->select('messages.language, messages.name, messages.message')
+                                    ->get();
+            //check if there are results and return them
+            if ($messageResult->getNumRows() > 0) {
+                $data = $messageResult->getResultArray();
+                return true;
+            } else {
+                return false;
+            }
+        }
+
     //insert given message
     public function insertMessage($data) {
         // Check if a message with the same name and language exists
