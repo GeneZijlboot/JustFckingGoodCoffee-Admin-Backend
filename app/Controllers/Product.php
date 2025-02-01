@@ -66,6 +66,7 @@ class Product extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //create a product + its given product type + its given messages
     public function createProduct() {
         //define variables
         $message = null;
@@ -163,6 +164,7 @@ class Product extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //delete a product based on the send through id 
     public function deleteProduct() {
         //define variables
         $message = null;
@@ -193,6 +195,7 @@ class Product extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //save the product image + infobar image to this admin backend
     public function saveImage() {
         $message = [];
     
@@ -244,6 +247,55 @@ class Product extends BaseController
         ];
     
         //return response in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //get product options for creating a product type
+    public function getOptions() {
+        $message = null;
+        $data = [];
+
+        //get all product types
+        if ($status = $this->productsModel->getProductOptions($data)) {
+            $message = 'succesfully.got.all.product.options'; 
+        } else {
+            $message = 'error.getting.product.types';
+        }
+ 
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message,
+        ];
+    
+        //return response in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //search the messages table over every column in the datbase
+    public function searchCrudTable() {
+        //define variables
+        $message = null;
+        $data = [
+            'search_param' => $this->request->getPostGet('search_param'),
+        ];
+
+        //get all the data based on the serach_param
+        if ($status = $this->productsModel->getBySearchParam($data['search_param'])) {
+            $message = 'succesfully.found.results';
+        } else {
+            $message = 'No results found for: ' . $data['search_param'];
+        }
+
+        // Define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data, // Return grouped data
+            'message' => $message
+        ];
+    
+        // Return response back to frontend -> in JSON format
         return $this->response->setJSON($response_data);
     }
 }

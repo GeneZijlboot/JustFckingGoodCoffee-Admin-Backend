@@ -110,4 +110,30 @@ class ApiKey extends BaseController
         //return response back to frontend -> in JSON format
         return $this->response->setJSON($response_data);
     }
+
+    //search the messages table over every column in the datbase
+    public function searchCrudTable() {
+        //define variables
+        $message = null;
+        $data = [
+            'search_param' => $this->request->getPostGet('search_param'),
+        ];
+
+        //get all the data based on the serach_param
+        if ($status = $this->apiKeysModel->getBySearchParam($data['search_param'])) {
+            $message = 'succesfully.found.results';
+        } else {
+            $message = 'No results found for: ' . $data['search_param'];
+        }
+
+        // Define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data, // Return grouped data
+            'message' => $message
+        ];
+    
+        // Return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
 }

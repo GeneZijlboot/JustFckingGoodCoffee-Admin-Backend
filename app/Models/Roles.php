@@ -27,6 +27,25 @@ class Roles extends Model
         }
     }
 
+    //get all rows based on the given searchValue
+    public function getBySearchParam(&$searchValue) {
+        if (!empty($searchValue)) {
+            $this->builder->groupStart()
+                    ->orLike('roles.id', $searchValue)
+                    ->orLike('roles.name', $searchValue)
+                    ->groupEnd();
+        }
+        
+        $rolesResult = $this->builder->get();
+
+        if ($rolesResult->getNumRows() > 0) {
+            $searchValue = $rolesResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     //insert given Role
     public function insertRole($data) {
         // Check if a role with the same name already exists

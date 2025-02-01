@@ -27,6 +27,27 @@ class ApiKeys extends Model
         }
     }
 
+    //get all rows based on the given searchValue
+    public function getBySearchParam(&$searchValue) {
+        if (!empty($searchValue)) {
+            $this->builder->groupStart()
+                    ->orLike('api_keys.id', $searchValue)
+                    ->orLike('api_keys.provider', $searchValue)
+                    ->orLike('api_keys.public_key', $searchValue)
+                    ->orLike('api_keys.secret_key', $searchValue)
+                    ->groupEnd();
+        }
+        
+        $messageResult = $this->builder->get();
+
+        if ($messageResult->getNumRows() > 0) {
+            $searchValue = $messageResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     //insert given Role
     public function insertApiKey($data) {
         //check if a role with the same name already exists

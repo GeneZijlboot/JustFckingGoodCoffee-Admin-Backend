@@ -11,6 +11,7 @@ class ProductVariants extends Model
         // Initialize database connection and assign the query builder to the users table
         $this->db = \Config\Database::connect();
         $this->builder = $this->db->table('product_variants');
+        $this->productbuilder = $this->db->table('products');
     }
 
     //get all users
@@ -22,6 +23,46 @@ class ProductVariants extends Model
         //check if there are results and return them
         if ($productVariantResult->getNumRows() > 0) {
             $data = $productVariantResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //get rows based on the given searchValue (with optional search filters)
+    public function getBySearchParam(&$searchValue, $searchFields = []) {
+        // Ensure the builder is reset or use the appropriate builder
+        $this->builder->select('product_variants.id, product_variants.product_id, products.name AS product_name, product_variants.weight, product_variants.price')
+                        ->join('products', 'product_variants.product_id = products.id');
+
+        //if a search value is provided, apply the filters dynamically
+        if (!empty($searchValue)) {
+            $this->builder->groupStart();
+
+            //apply filters for specific fields, or all fields by default
+            if (empty($searchFields)) {
+                //if no specific search fields are provided, search all relevant fields
+                $this->builder->orLike('product_variants.id', $searchValue)
+                            ->orLike('product_variants.product_id', $searchValue)
+                            ->orLike('product_variants.weight', $searchValue)
+                            ->orLike('product_variants.price', $searchValue)
+                            ->orLike('products.name', $searchValue);
+            } else {
+                //if specific fields are provided, apply the search value to them
+                foreach ($searchFields as $field) {
+                    $this->builder->orLike($field, $searchValue);
+                }
+            }
+
+            $this->builder->groupEnd();
+        }
+
+        //execute the query
+        $productVariantResult = $this->builder->get();
+
+        //check if there are results and return them
+        if ($productVariantResult->getNumRows() > 0) {
+            $searchValue = $productVariantResult->getResultArray();
             return true;
         } else {
             return false;

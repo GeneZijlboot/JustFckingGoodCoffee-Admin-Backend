@@ -49,6 +49,54 @@ class Users extends Model
         }
     }
 
+
+    //get rows based on the given searchValue (with optional search filters)
+    public function getBySearchParam(&$searchValue, $searchFields = []) {
+        // Ensure the builder is reset or use the appropriate builder
+        $this->builder->select('users.id, users.user_role_id, roles.name AS role_name, users.first_name, users.last_name, users.email, users.phone_number, users.street_name, users.house_number, users.city, users.zipcode, users.subscription, users.created_at')
+                        ->join('roles', 'users.user_role_id = roles.id');
+
+        //if a search value is provided, apply the filters dynamically
+        if (!empty($searchValue)) {
+            $this->builder->groupStart();
+
+            //apply filters for specific fields, or all fields by default
+            if (empty($searchFields)) {
+                //if no specific search fields are provided, search all relevant fields
+                $this->builder->orLike('users.id', $searchValue)
+                            ->orLike('users.user_role_id', $searchValue)
+                            ->orLike('users.first_name', $searchValue)
+                            ->orLike('users.last_name', $searchValue)
+                            ->orLike('users.email', $searchValue)
+                            ->orLike('users.phone_number', $searchValue)
+                            ->orLike('users.house_number', $searchValue)
+                            ->orLike('users.city', $searchValue)
+                            ->orLike('users.zipcode', $searchValue)
+                            ->orLike('users.subscription', $searchValue)
+                            ->orLike('users.created_at', $searchValue)
+                            ->orLike('roles.name', $searchValue);
+            } else {
+                //if specific fields are provided, apply the search value to them
+                foreach ($searchFields as $field) {
+                    $this->builder->orLike($field, $searchValue);
+                }
+            }
+
+            $this->builder->groupEnd();
+        }
+
+        //execute the query
+        $userResult = $this->builder->get();
+
+        //check if there are results and return them
+        if ($userResult->getNumRows() > 0) {
+            $searchValue = $userResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     //delete user by id
     public function DeleteById($user_id) {
         // Check if the user exists

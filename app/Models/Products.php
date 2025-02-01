@@ -27,6 +27,27 @@ class Products extends Model
         }
     }
 
+    //get all rows based on the given searchValue
+    public function getBySearchParam(&$searchValue) {
+        if (!empty($searchValue)) {
+            $this->builder->groupStart()
+                    ->orLike('products.id', $searchValue)
+                    ->orLike('products.name', $searchValue)
+                    ->orLike('products.roast_type', $searchValue)
+                    ->orLike('products.origin', $searchValue)
+                    ->groupEnd();
+        }
+        
+        $productResult = $this->builder->get();
+
+        if ($productResult->getNumRows() > 0) {
+            $searchValue = $productResult->getResultArray();
+            return true;
+        } else {
+            return false;
+        }
+    }
+
     //insert given Product
     public function insertProduct(&$data) {
         // Check if a role with the same name already exists
@@ -90,6 +111,20 @@ class Products extends Model
             return true;  // Return true if product found
         } else {
             return false;  // Return false if no product found
+        }
+    }
+
+    //get all product type (product_id and product_name)
+    public function getProductOptions(&$data) {
+        $productResult = $this->builder
+                                ->select('products.id, products.name')
+                                ->get();
+        //check if there are results and return them
+        if ($productResult->getNumRows() > 0) {
+            $data = $productResult->getResultArray();
+            return true;
+        } else {
+            return false;
         }
     }
 }

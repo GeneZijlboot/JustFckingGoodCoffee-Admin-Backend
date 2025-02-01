@@ -121,16 +121,15 @@ class Message extends BaseController
 
     //get with language ( translations admin )
     public function getWithLanguage() {
-        // Define variables
+        //define variables
         $message = null;
         $groupedData = [];
-        $status = false;
     
-        // Get all translations
+        //get all translations
         if ($status = $this->messagesModel->getWithLanguage($translations)) {
             $message = 'succesfully.got.messages';
     
-            // Process each translation and group by language
+            //process each translation and group by language
             foreach ($translations as $translation) {
                 $locale = strtolower($translation['language']); // Ensure locale is lowercase
     
@@ -138,17 +137,43 @@ class Message extends BaseController
                     $groupedData[$locale] = []; // Initialize the language block if it doesn't exist
                 }
     
-                // Add the flat key-value pair for the language
+                //add the flat key-value pair for the language
                 $groupedData[$locale][$translation['name']] = $translation['message'];
             }
         } else {
             $message = 'no.messages.found';
         }
     
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $groupedData,
+            'message' => $message
+        ];
+    
+        // Return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //search the messages table over every column in the datbase
+    public function searchCrudTable() {
+        //define variables
+        $message = null;
+        $data = [
+            'search_param' => $this->request->getPostGet('search_param'),
+        ];
+
+        //get all the data based on the serach_param
+        if ($status = $this->messagesModel->getBySearchParam($data['search_param'])) {
+            $message = 'succesfully.found.results';
+        } else {
+            $message = 'No results found for: ' . $data['search_param'];
+        }
+
         // Define response data
         $response_data = [
             'status' => $status,
-            'data' => $groupedData, // Return grouped data
+            'data' => $data, // Return grouped data
             'message' => $message
         ];
     
