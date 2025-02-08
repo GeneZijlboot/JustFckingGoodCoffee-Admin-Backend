@@ -6,14 +6,14 @@ use CodeIgniter\Model;
 
 class Messages extends Model
 {
-    //constructor fucntion
+    //constructor function
     public function __construct() {
         //initialize database connection and assign the query builder to the users table
         $this->db = \Config\Database::connect();
         $this->builder = $this->db->table('messages');
     }
 
-    //get all users
+    //get all messages
     public function getAll(&$data = []) {
         $messageResult = $this->builder
                                 ->select('messages.id, messages.language, messages.name, messages.message')
@@ -105,7 +105,34 @@ class Messages extends Model
         return false;
     }
 
-    //delete by id
+    //update a message
+    public function updateMessage($data) {
+        $newMessage = $this->builder
+                                ->where('id', $data['id'])
+                                ->get();
+
+        //check if the message exists
+        if ($newMessage->getNumRows() == 1) {
+        //update the message
+            $this->builder
+                    ->where('id', $data['id'])
+                    ->update(['name' => $data['name'], 'language' => $data['language'], 'message' => $data['message']]);
+            
+            $updatedMessage = $this->builder
+                    ->where(['id' => $data['id'], 'name' => $data['name'], 'language' => $data['language'], 'message' => $data['message']])
+                    ->get();
+                    
+            if ($updatedMessage->getNumRows() == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    //delete by message id
     public function DeleteById($message_id) {
         //check if the user exists
         $messageResult = $this->builder()
@@ -121,20 +148,6 @@ class Messages extends Model
             return true; //successfully deleted
         } else {
             return false; //user not found
-        }
-    }
-    
-    public function getProductFieldTranslation(&$product) {
-        $messageResult = $this->builder
-                                ->select('messages.message')
-                                ->where('name', $product)
-                                ->get();
-        //check if there are results and return them
-        if ($messageResult->getNumRows() > 0) {
-            $product = $messageResult->getResultArray();
-            return true;
-        } else {
-            return false;
         }
     }
 }

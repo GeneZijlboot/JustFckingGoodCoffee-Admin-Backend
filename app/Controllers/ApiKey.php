@@ -13,7 +13,7 @@ class ApiKey extends BaseController
         $this->apiKeysModel = model(ApiKeys::class);
     }
 
-    //get all users
+    //get all Api-Key's
     public function getAll() {
         //define variables
         $message = null;
@@ -54,6 +54,7 @@ class ApiKey extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //create Api-Key
     public function createApiKey() {
         //define variables
         $message = null;
@@ -81,6 +82,45 @@ class ApiKey extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //update Api-Key
+    public function UpdateApiKey() {
+        //define variables
+        $message = null;
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+            'provider' => $this->request->getPostGet('provider'),
+            'public_key' => $this->request->getPostGet('public_key'),
+            'secret_key' => $this->request->getPostGet('secret_key'),
+        ];
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            //insert new message
+            if ($status = $this->apiKeysModel->updateApiKey($data)) {
+                $message = 'succesfully.updated.api_key';
+            } else {
+                $message = 'failed.to.update.api_key';
+            }
+        } else {
+            $message = 'not.logged.in';
+        }
+
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //delete Api-Key
     public function deleteApiKey() {
         //define variables
         $message = null;
@@ -111,7 +151,7 @@ class ApiKey extends BaseController
         return $this->response->setJSON($response_data);
     }
 
-    //search the messages table over every column in the datbase
+    //search the Api-Key's table over every column in the database
     public function searchCrudTable() {
         //define variables
         $message = null;

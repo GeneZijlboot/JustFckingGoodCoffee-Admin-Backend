@@ -75,6 +75,33 @@ class Roles extends Model
         return false;
     }
     
+    //update a message
+    public function updateRole($data) {
+        $newRole = $this->builder
+                                ->where('id', $data['id'])
+                                ->get();
+
+        //check if the message exists
+        if ($newRole->getNumRows() == 1) {
+            //update the message
+            $this->builder
+                    ->where('id', $data['id'])
+                    ->update(['name' => $data['name']]);
+            
+            $updatedRole = $this->builder
+                    ->where(['id' => $data['id'], 'name' => $data['name']])
+                    ->get();
+                    
+            if ($updatedRole->getNumRows() == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
     //delete by id
     public function DeleteById($role_id) {
         // Check if the user exists
@@ -94,6 +121,7 @@ class Roles extends Model
         }
     }
 
+    //get role options
     public function getOptions(&$data = []) {
         $roleResult = $this->builder
                                 ->select('roles.id, roles.name')

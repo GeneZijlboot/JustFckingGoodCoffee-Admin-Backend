@@ -161,39 +161,7 @@ class User extends BaseController
         return $this->response->setJSON($response_data);
     }
 
-    //delete by id
-    public function deleteUser() {
-        //define variables
-        $message = null;
-        $data = [];
-
-        //define url parameter
-        $user_id = $this->request->getPostGet('id');
-
-        //getsession
-        $session = session();
-        $currentUser = $session->get('currentUser');
-    
-        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
-            if ($status = $this->usersModel->DeleteById($user_id)) {
-                $message = 'succesfully.deleted.user';
-            }
-        } else {
-            $message = 'not.logged.in';
-        }
-
-        //define response data
-        $response_data = [
-            'status' => $status,
-            'data' => $data,
-            'message' => $message
-        ];
-
-        //return response back to frontend -> in JSON format
-        return $this->response->setJSON($response_data);
-    }
-
-    //register function 
+    //create a user 
     public function createUser() {
         //set parameters
         $message = null;
@@ -282,6 +250,81 @@ class User extends BaseController
                     $message = $error_msg;
                 }
             }
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //update a user
+    public function UpdateUser() {
+        //define variables
+        $message = null;
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+            'first_name' => $this->request->getPostGet('first_name'),
+            'last_name' => $this->request->getPostGet('last_name'),
+            'user_role_id' => $this->request->getPostGet('user_role_id'),
+            'city' => $this->request->getPostGet('city') ?? null,
+            'zipcode' => $this->request->getPostGet('zipcode') ?? null,
+            'phone_number' => $this->request->getPostGet('phone_number') ?? null,
+            'house_number' => $this->request->getPostGet('house_number') ?? null,
+            'street_name' => $this->request->getPostGet('street_name') ?? null,
+        ];
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            //insert new message
+            if ($status = $this->usersModel->UpdateUser($data)) {
+                $message = 'succesfully.updated.user';
+            } else {
+                $message = 'failed.to.update.user';
+            }
+        } else {
+            $message = 'not.logged.in';
+        }
+
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //delete by user id
+    public function deleteUser() {
+        //define variables
+        $message = null;
+        $data = [];
+
+        //define url parameter
+        $user_id = $this->request->getPostGet('id');
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+    
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            if ($status = $this->usersModel->DeleteById($user_id)) {
+                $message = 'succesfully.deleted.user';
+            }
+        } else {
+            $message = 'not.logged.in';
         }
 
         //define response data

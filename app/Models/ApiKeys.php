@@ -48,7 +48,7 @@ class ApiKeys extends Model
         }
     }
 
-    //insert given Role
+    //insert given Api-Key
     public function insertApiKey($data) {
         //check if a role with the same name already exists
         $existingApiKey = $this->builder
@@ -77,7 +77,34 @@ class ApiKeys extends Model
         return false;
     }
 
-    //delete by id
+    //update an Api-Key
+    public function updateApiKey($data) {
+        $newApiKey = $this->builder
+                                ->where('id', $data['id'])
+                                ->get();
+
+        //check if the message exists
+        if ($newApiKey->getNumRows() == 1) {
+        //update the message
+            $this->builder
+                    ->where('id', $data['id'])
+                    ->update(['provider' => $data['provider'], 'public_key' => $data['public_key'], 'secret_key' => $data['secret_key']]);
+            
+            $updatedApiKey = $this->builder
+                    ->where(['id' => $data['id'], 'provider' => $data['provider'], 'public_key' => $data['public_key'], 'secret_key' => $data['secret_key']])
+                    ->get();
+                    
+            if ($updatedApiKey->getNumRows() == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    //delete by Api-Key id
     public function DeleteById($api_key_id) {
         // Check if the user exists
         $apiKeysResult = $this->builder()

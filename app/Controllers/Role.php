@@ -52,6 +52,7 @@ class Role extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //create role
     public function createRole() {
         //define variables
         $message = null;
@@ -77,6 +78,43 @@ class Role extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //update role
+    public function UpdateRole() {
+        //define variables
+        $message = null;
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+            'name' => $this->request->getPostGet('name'),
+        ];
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            //insert new message
+            if ($status = $this->rolesModel->updateRole($data)) {
+                $message = 'succesfully.updated.role';
+            } else {
+                $message = 'failed.to.update.role';
+            }
+        } else {
+            $message = 'not.logged.in';
+        }
+
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //delete role on id
     public function deleteRole() {
         //define variables
         $message = null;

@@ -49,7 +49,6 @@ class Users extends Model
         }
     }
 
-
     //get rows based on the given searchValue (with optional search filters)
     public function getBySearchParam(&$searchValue, $searchFields = []) {
         // Ensure the builder is reset or use the appropriate builder
@@ -97,25 +96,6 @@ class Users extends Model
         }
     }
 
-    //delete user by id
-    public function DeleteById($user_id) {
-        // Check if the user exists
-        $userResult = $this->builder()
-                           ->where('id', $user_id)
-                           ->get();
-    
-        if ($userResult->getNumRows() > 0) {
-            // User exists, proceed to delete
-            $this->builder()
-                 ->where('id', $user_id)
-                 ->delete();
-    
-            return true; // Successfully deleted
-        } else {
-            return false; // User not found
-        }
-    }
-
     //register function
     public function createUser($createNewUser) {
         // Attempt to insert the new user data into the 'users' table
@@ -129,6 +109,53 @@ class Users extends Model
         }
     }
 
+    //update a user
+    public function UpdateUser($data) {
+        $newUser = $this->builder
+                            ->where('id', $data['id'])
+                            ->get();
+
+        //check if the message exists
+        if ($newUser->getNumRows() == 1) {
+        //update the user
+            $this->builder
+                    ->where('id', $data['id'])
+                    ->update(['id' => $data['id'], 'first_name' => $data['first_name'], 'last_name' => $data['last_name'], 'user_role_id' => $data['user_role_id'], 'city' => $data['city'], 'zipcode' => $data['zipcode'], 'phone_number' => $data['phone_number'], 'house_number' => $data['house_number'], 'street_name' => $data['street_name']]);
+        
+
+            $updatedUser = $this->builder
+                                    ->where(['id' => $data['id'], 'first_name' => $data['first_name'], 'last_name' => $data['last_name'], 'user_role_id' => $data['user_role_id'], 'city' => $data['city'], 'zipcode' => $data['zipcode'], 'phone_number' => $data['phone_number'], 'house_number' => $data['house_number'], 'street_name' => $data['street_name']])
+                                    ->get();
+
+            if ($updatedUser->getNumRows() == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
+    }
+
+    //delete user by id
+    public function DeleteById($user_id) {
+        // Check if the user exists
+        $userResult = $this->builder()
+                            ->where('id', $user_id)
+                            ->get();
+    
+        if ($userResult->getNumRows() > 0) {
+            // User exists, proceed to delete
+            $this->builder()
+                    ->where('id', $user_id)
+                    ->delete();
+    
+            return true; // Successfully deleted
+        } else {
+            return false; // User not found
+        }
+    }
+    
     //check if given email exists in database (for when creating an account (register))
     public function checkIfEmailExists($arrCheckEmail) {
         $userResult = $this->builder->where('email', $arrCheckEmail)->get();
