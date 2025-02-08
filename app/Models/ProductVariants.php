@@ -69,7 +69,7 @@ class ProductVariants extends Model
         }
     }
 
-    //insert given product vairant
+    //insert given product variant
     public function insertProductVariant($data) {
         // Check if a role with the same name already exists
         $existinProductVariant = $this->builder
@@ -98,6 +98,33 @@ class ProductVariants extends Model
 
         // Default return false in case of any issues
         return false;
+    }
+
+    //update a product variant
+    public function updateProductVariant($data) {
+        $newProductVariant = $this->builder
+                                ->where('id', $data['id'])
+                                ->get();
+
+        //check if the message exists
+        if ($newProductVariant->getNumRows() == 1) {
+        //update the message
+            $this->builder
+                    ->where('id', $data['id'])
+                    ->update(['price' => $data['product_types'][0]['price']]);
+            
+            $updatedProductVariant = $this->builder
+                    ->where(['id' => $data['id'], 'price' => $data['product_types'][0]['price']])
+                    ->get();
+                    
+            if ($updatedProductVariant->getNumRows() == 1) {
+                return true;
+            } else {
+                return false;
+            }
+        } else {
+            return false;
+        }
     }
 
     //delete by id

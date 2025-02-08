@@ -124,6 +124,41 @@ class ProductVariant extends BaseController
         return $this->response->setJSON($response_data);
     }
 
+    //update a product Types price
+    public function updateProductVariant() {
+        //define variables
+        $message = null;
+        $data = [
+            'id' => $this->request->getPostGet('id'),
+            'product_types' => json_decode($this->request->getPostGet('product_types'), true),
+        ];
+        
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            //insert new message
+            if ($status = $this->productVariant->updateProductVariant($data)) {
+                $message = 'succesfully.updated.product_variant';
+            } else {
+                $message = 'failed.to.update.product_variant';
+            }
+        } else {
+            $message = 'not.logged.in';
+        }
+
+        //define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data,
+            'message' => $message
+        ];
+
+        //return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
     public function deleteProductVariant() {
         //define variables
         $message = null;
