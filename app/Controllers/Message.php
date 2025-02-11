@@ -33,7 +33,7 @@ class Message extends BaseController
                 $data['field_headers'] = [
                     '#',
                     'Language',
-                    'Name',
+                    'Variable',
                     'Message',
                     '', //for the CRUD icons
                 ];
