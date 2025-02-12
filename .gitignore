@@ -1,5 +1,4 @@
 # CodeIgniter 4 specific
-/writable/*
 /public/uploads/*
 
 # Ignore everything in writable, but allow version control for the writable/.gitignore file
