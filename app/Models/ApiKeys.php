@@ -16,7 +16,7 @@ class ApiKeys extends Model
     //get all users
     public function getAll(&$data = []) {
         $apiKeyResult = $this->builder
-                                ->select('api_keys.id, api_keys.provider, api_keys.public_key, api_keys.secret_key')
+                                ->select('api_keys.id, api_keys.integration_id, api_keys.provider, api_keys.public_key, api_keys.secret_key')
                                 ->get();
         //check if there are results and return them
         if ($apiKeyResult->getNumRows() > 0) {
@@ -88,10 +88,10 @@ class ApiKeys extends Model
         //update the message
             $this->builder
                     ->where('id', $data['id'])
-                    ->update(['provider' => $data['provider'], 'public_key' => $data['public_key'], 'secret_key' => $data['secret_key']]);
+                    ->update(['provider' => $data['provider'], 'integration_id' => $data['integration_id'], 'public_key' => $data['public_key'], 'secret_key' => $data['secret_key']]);
             
             $updatedApiKey = $this->builder
-                    ->where(['id' => $data['id'], 'provider' => $data['provider'], 'public_key' => $data['public_key'], 'secret_key' => $data['secret_key']])
+                    ->where(['id' => $data['id'], 'integration_id' => $data['integration_id'], 'provider' => $data['provider'], 'public_key' => $data['public_key'], 'secret_key' => $data['secret_key']])
                     ->get();
                     
             if ($updatedApiKey->getNumRows() == 1) {
@@ -120,6 +120,44 @@ class ApiKeys extends Model
             return true; // Successfully deleted
         } else {
             return false; // User not found
+        }
+    }
+
+    //get tinymce key
+    public function getTinyMCEKey(&$data) {
+        $result = $this->builder
+                ->select('public_key')
+                ->where('provider', $data["provider"])
+                ->get(); //get all matching rows
+    
+        //check if there are results and return the key value
+        if ($result->getNumRows() > 0) {
+            //set key value equal to data for data-flow-back
+            $resultArray = $result->getResultArray();
+            $data["api_key"] = $resultArray[0]["public_key"];
+
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    //get sendcloud data
+    public function getSendCloudKeys(&$data) {
+        $result = $this->builder
+                ->select('integration_id, public_key, secret_key')
+                ->where('provider', $data["provider"])
+                ->get(); //get all matching rows
+
+        //check if there are results and return the key value
+        if ($result->getNumRows() > 0) {
+            //set key value equal to data for data-flow-back
+            $resultArray = $result->getResultArray();
+            $data["api_key"] = $resultArray[0]["public_key"] . ':' . $resultArray[0]["secret_key"];
+            $data["integration_id"] = $resultArray[0]["integration_id"];
+            return true;
+        } else {
+            return false;
         }
     }
 }

@@ -42,6 +42,9 @@ class Messages extends Model
 
         if ($messageResult->getNumRows() > 0) {
             $searchValue = $messageResult->getResultArray();
+            foreach ($searchValue as &$translations) { // Use a reference to modify the actual array element
+                $translations['controller'] = 'Message';
+            }
             return true;
         } else {
             return false;

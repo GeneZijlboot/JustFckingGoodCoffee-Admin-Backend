@@ -67,6 +67,7 @@ class Message extends BaseController
         $currentUser = $session->get('currentUser');
 
         if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            $data['message'] = strtolower(str_replace(' ', '_', $data['message']));
             //insert new message
             if ($status = $this->messagesModel->insertMessage($data)) {
                 $message = 'succesfully.created.message';

@@ -33,6 +33,7 @@ class ApiKey extends BaseController
                 //define table headers
                 $data['field_headers'] = [
                     '#',
+                    'Integration id',
                     'Provider',
                     'Public Key',
                     'Secret Key',
@@ -91,6 +92,7 @@ class ApiKey extends BaseController
             'provider' => $this->request->getPostGet('provider'),
             'public_key' => $this->request->getPostGet('public_key'),
             'secret_key' => $this->request->getPostGet('secret_key'),
+            'integration_id' => $this->request->getPostGet('integration_id'),
         ];
 
         //getsession
@@ -164,6 +166,37 @@ class ApiKey extends BaseController
             $message = 'succesfully.found.results';
         } else {
             $message = 'No results found for: ' . $data['search_param'];
+        }
+
+        // Define response data
+        $response_data = [
+            'status' => $status,
+            'data' => $data, // Return grouped data
+            'message' => $message
+        ];
+    
+        // Return response back to frontend -> in JSON format
+        return $this->response->setJSON($response_data);
+    }
+
+    //getting the tinyMce key
+    public function getTinyMCEKey() {
+        //define variables
+        $message = null;
+        $data = [];
+
+        //getsession
+        $session = session();
+        $currentUser = $session->get('currentUser');
+
+        if ($status = (isset($currentUser) && $currentUser["user_role_id"] == 1)) { // check if a user is logged in and if admin
+            $data['provider'] = 'TinyMce';
+            
+            if ($status = $this->apiKeysModel->getTinyMCEKey($data)) {
+                $message = 'succesfully.get.api.key.tinmyce';
+            }
+        } else {
+            $message = 'not.correct.rights';
         }
 
         // Define response data
